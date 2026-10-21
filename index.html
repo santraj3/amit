@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amit Academy Games</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#090d16',
+                        cardBg: '#111827',
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #090d16;
+            background-image: 
+                radial-gradient(at 10% 10%, hsla(250, 70%, 15%, 0.5) 0px, transparent 50%),
+                radial-gradient(at 90% 10%, hsla(210, 80%, 15%, 0.4) 0px, transparent 50%),
+                radial-gradient(at 50% 80%, hsla(280, 60%, 12%, 0.4) 0px, transparent 50%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            color: #f1f5f9;
+        }
+
+        /* 3D Glossy Card Base */
+        .game-card {
+            display: block;
+            position: relative;
+            aspect-ratio: 1 / 1;
+            border-radius: 24px;
+            text-decoration: none;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6);
+            border: 2px solid rgba(255, 255, 255, 0.05);
+            background: #111827;
+            cursor: pointer;
+        }
+
+        .game-card:hover {
+            transform: translateY(-10px) scale(1.03);
+            box-shadow: 0 25px 40px -10px rgba(99, 102, 241, 0.3), 0 0 25px rgba(168, 85, 247, 0.2);
+            border-color: rgba(168, 85, 247, 0.5);
+            z-index: 10;
+        }
+
+        .game-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 24px;
+            transition: transform 0.5s ease;
+            pointer-events: none; 
+        }
+
+        .game-card:hover .game-image {
+            transform: scale(1.08);
+        }
+
+        /* Search expansion transition */
+        #searchContainer {
+            transition: all 0.3s ease-in-out;
+            max-width: 0;
+            opacity: 0;
+            overflow: hidden;
+        }
+        #searchContainer.active {
+            max-width: 250px;
+            opacity: 1;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #090d16;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen justify-between">
+
+    <!-- Top Ticker / Announcement Bar -->
+    <div class="bg-gradient-to-r from-indigo-900 via-purple-900 to-pink-900 text-xs sm:text-sm text-center py-2 px-4 font-medium text-purple-200 border-b border-purple-800/40 shadow-sm flex items-center justify-center gap-2">
+        <i class="fa-solid fa-bolt text-yellow-400 animate-bounce"></i>
+        <span>Welcome to Amit Academy Games! Play Instantly in Browser!</span>
+    </div>
+
+    <!-- Header Navigation with Search Icon on Right -->
+    <header class="w-full max-w-6xl mx-auto px-4 pt-6 pb-4 flex items-center justify-between gap-4 relative">
+        <a href="https://amitacademy.in" class="flex items-center gap-3 group text-decoration-none">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-500 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-500/30 group-hover:scale-105 transition">
+                <i class="fa-solid fa-gamepad text-white text-lg"></i>
+            </div>
+            <div>
+                <span class="text-xs tracking-widest uppercase text-purple-400 font-bold block">Amit Academy</span>
+                <span class="text-xl font-extrabold text-white tracking-wide">Mini Games</span>
+            </div>
+        </a>
+
+        <!-- Right Side: Search Icon & Expandable Input -->
+        <div class="flex items-center gap-2">
+            <div id="searchContainer" class="flex items-center">
+                <input type="text" id="gameSearch" placeholder="Search games..." 
+                    class="w-full bg-slate-900/90 text-slate-200 text-sm rounded-full pl-4 pr-4 py-2 border border-slate-700 focus:outline-none focus:border-purple-500 backdrop-blur-md">
+            </div>
+            <button onclick="toggleSearch()" id="searchToggleBtn" class="w-11 h-11 rounded-full bg-slate-900/80 border border-slate-700/80 text-slate-300 hover:text-white hover:border-purple-500 flex items-center justify-center transition backdrop-blur-md shadow-md">
+                <i class="fa-solid fa-magnifying-glass text-sm"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Hero Banner & Content Section -->
+    <main class="w-full max-w-6xl mx-auto px-4 flex-grow pb-16">
+        
+        <!-- Hero Banner Title -->
+        <div class="text-center my-6 md:my-10">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-950/80 border border-purple-700/50 text-purple-300 text-xs font-semibold mb-3 backdrop-blur-md shadow-inner">
+                <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span> 100% Free • No Downloads Required
+            </div>
+            <h1 class="text-4xl sm:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400 mb-3 tracking-tight drop-shadow-sm">
+                Play Epic Mini Games
+            </h1>
+            <p class="text-slate-400 text-base sm:text-lg max-w-2xl mx-auto font-normal">
+                Challenge your reflexes, solve puzzles, and beat your high scores instantly right in your web browser.
+            </p>
+        </div>
+
+        <!-- Category Filter Tabs -->
+        <div class="flex items-center justify-center gap-2 sm:gap-3 mb-8 overflow-x-auto pb-2 scrollbar-none">
+            <button onclick="filterGames('all')" class="filter-btn px-5 py-2 rounded-xl text-sm font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-indigo-600/30 transition">All Games</button>
+            <button onclick="filterGames('arcade')" class="filter-btn px-5 py-2 rounded-xl text-sm font-semibold bg-slate-900/80 hover:bg-slate-800 text-slate-300 border border-slate-800 transition">Arcade</button>
+            <button onclick="filterGames('puzzle')" class="filter-btn px-5 py-2 rounded-xl text-sm font-semibold bg-slate-900/80 hover:bg-slate-800 text-slate-300 border border-slate-800 transition">Puzzle & Math</button>
+        </div>
+
+        <!-- Game Cards Grid -->
+        <div id="gamesGrid" class="grid grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 w-full">
+            
+            <!-- Game 1: Knife Hit -->
+            <a href="https://amitacademy.in/knife.html" target="_blank" rel="noopener noreferrer" class="game-card" data-category="arcade" data-name="knife hit">
+                <img src="https://imghosting.in/host/ikylx6" alt="Knife Hit" class="game-image" onerror="this.src='https://placehold.co/400x400/1e293b/ffffff?text=Knife+Hit'">
+            </a>
+
+            <!-- Game 2: Fruit Cutter -->
+            <a href="https://amitacademy.in/fruit.html" target="_blank" rel="noopener noreferrer" class="game-card" data-category="arcade" data-name="fruit cutter">
+                <img src="https://imghosting.in/host/x0qpck" alt="Fruit Cutter" class="game-image" onerror="this.src='https://placehold.co/400x400/1e293b/ffffff?text=Fruit+Cutter'">
+            </a>
+
+            <!-- Game 3: Bubble Shooter -->
+            <a href="https://amitacademy.in/bubble.html" target="_blank" rel="noopener noreferrer" class="game-card" data-category="puzzle" data-name="bubble shooter">
+                <img src="https://imghosting.in/host/ap2jtl" alt="Bubble Shooter" class="game-image" onerror="this.src='https://placehold.co/400x400/1e293b/ffffff?text=Bubble+Shooter'">
+            </a>
+
+            <!-- Game 4: Math Puzzle -->
+            <a href="https://amitacademy.in/math.html" target="_blank" rel="noopener noreferrer" class="game-card" data-category="puzzle" data-name="math puzzle">
+                <img src="https://imghosting.in/host/npteon" alt="Math Puzzle" class="game-image" onerror="this.src='https://placehold.co/400x400/1e293b/ffffff?text=Math+Puzzle'">
+            </a>
+
+            <!-- Game 5: Runner -->
+            <a href="https://amitacademy.in/runner.html" target="_blank" rel="noopener noreferrer" class="game-card" data-category="arcade" data-name="runner game">
+                <img src="https://imghosting.in/host/z0syab" alt="Runner" class="game-image" onerror="this.src='https://placehold.co/400x400/1e293b/ffffff?text=Runner'">
+            </a>
+
+            <!-- Game 6: Snake -->
+            <a href="https://amitacademy.in/snake.html" target="_blank" rel="noopener noreferrer" class="game-card" data-category="arcade" data-name="snake game">
+                <img src="https://imghosting.in/host/4tfrmx" alt="Snake Game" class="game-image" onerror="this.src='https://placehold.co/400x400/1e293b/ffffff?text=Snake+Game'">
+            </a>
+
+        </div>
+
+        <!-- No Results State -->
+        <div id="noResults" class="hidden text-center py-16">
+            <i class="fa-solid fa-ghost text-4xl text-slate-600 mb-3"></i>
+            <p class="text-slate-400 font-medium">No games found matching your search.</p>
+        </div>
+
+    </main>
+
+    <!-- Footer Section -->
+    <footer class="w-full bg-slate-950/80 border-t border-slate-900 pt-10 pb-8 mt-auto">
+        <div class="w-full max-w-6xl mx-auto px-4 flex flex-col items-center text-center">
+            
+            <a href="https://amitacademy.in" class="text-lg font-bold text-white mb-2 flex items-center gap-2">
+                <i class="fa-solid fa-gamepad text-purple-500"></i> Amit Academy
+            </a>
+            <p class="text-slate-400 text-xs sm:text-sm max-w-md mb-6">
+                Your ultimate destination for fast, fun and responsive browser-based mini-games. Play anywhere, anytime!
+            </p>
+
+            <div class="flex flex-wrap justify-center gap-6 mb-8 text-slate-300 text-xs sm:text-sm font-medium">
+                <a href="https://amitacademy.in/about.html" class="hover:text-purple-400 transition">About Us</a>
+                <a href="https://amitacademy.in/contact.html" class="hover:text-purple-400 transition">Contact Us</a>
+                <a href="https://amitacademy.in/privacy.html" class="hover:text-purple-400 transition">Privacy Policy</a>
+                <a href="https://amitacademy.in/terms.html" class="hover:text-purple-400 transition">Terms & Conditions</a>
+            </div>
+
+            <div class="w-full border-t border-slate-900 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+                <p>&copy; 2026 Amit Academy. All rights reserved.</p>
+                <div class="flex items-center gap-4">
+                    <span class="inline-flex items-center gap-1.5 text-slate-400 font-medium">
+                        <i class="fa-solid fa-shield-halved text-emerald-400"></i> Secure & Safe Games
+                    </span>
+                </div>
+            </div>
+
+        </div>
+    </footer>
+
+    <!-- Interactive JavaScript -->
+    <script>
+        const searchContainer = document.getElementById('searchContainer');
+        const searchInput = document.getElementById('gameSearch');
+        const gamesGrid = document.getElementById('gamesGrid');
+        const gameCards = gamesGrid.querySelectorAll('.game-card');
+        const noResults = document.getElementById('noResults');
+
+        // Toggle Search Bar Visibility
+        function toggleSearch() {
+            searchContainer.classList.toggle('active');
+            if (searchContainer.classList.contains('active')) {
+                searchInput.focus();
+            } else {
+                searchInput.value = '';
+                triggerSearch('');
+            }
+        }
+
+        // Search Functionality
+        searchInput.addEventListener('input', (e) => {
+            triggerSearch(e.target.value.toLowerCase().trim());
+        });
+
+        function triggerSearch(query) {
+            let visibleCount = 0;
+            gameCards.forEach(card => {
+                const name = card.getAttribute('data-name');
+                if (name.includes(query)) {
+                    card.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            if (visibleCount === 0 && query !== '') {
+                noResults.classList.remove('hidden');
+            } else {
+                noResults.classList.add('hidden');
+            }
+        }
+
+        // Category Filter Functionality
+        function filterGames(category) {
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.className = 'filter-btn px-5 py-2 rounded-xl text-sm font-semibold bg-slate-900/80 hover:bg-slate-800 text-slate-300 border border-slate-800 transition';
+            });
+            event.target.className = 'filter-btn px-5 py-2 rounded-xl text-sm font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-indigo-600/30 transition';
+
+            let visibleCount = 0;
+            searchInput.value = '';
+            searchContainer.classList.remove('active');
+
+            gameCards.forEach(card => {
+                const cardCat = card.getAttribute('data-category');
+                if (category === 'all' || cardCat === category) {
+                    card.style.display = 'block';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            noResults.classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
