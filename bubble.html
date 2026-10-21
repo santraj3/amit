@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Bubble Pro</title>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Varela+Round&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        :root {
+            --bg-main: #020617;
+            --panel-bg: #020617;
+            --text-soft: #9ca3af;
+            --text-strong: #f9fafb;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: radial-gradient(circle at top, #111827 0%, #020617 55%, #000 100%);
+            font-family: 'Varela Round', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            touch-action: none;
+            color: var(--text-strong);
+        }
+
+        #game-container {
+            position: relative;
+            width: 100%;
+            max-width: 440px;
+            height: 100%;
+            max-height: 900px;
+            background: var(--panel-bg);
+            border-radius: 0;
+            box-shadow:
+                0 0 0 1px rgba(15, 23, 42, 0.8),
+                0 18px 40px rgba(0, 0, 0, 0.85);
+            overflow: hidden;
+        }
+
+        /* SCORE / TITLE BAR */
+        #ui-layer {
+            position: absolute;
+            top: 8px;
+            left: 0;
+            width: 100%;
+            padding: 6px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .score-box {
+            width: 95px;
+            height: 70px;
+            border-radius: 18px;
+            background: radial-gradient(circle at top, #020617 0%, #020617 40%, #000 100%);
+            box-shadow:
+                0 0 0 1px rgba(148, 163, 184, 0.18),
+                0 10px 18px rgba(0, 0, 0, 0.8);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .score-label {
+            font-size: 8px;
+            letter-spacing: 0.14em;
+            color: #a5b4fc;
+            font-family: 'Press Start 2P';
+        }
+
+        .score-value {
+            font-size: 16px;
+            margin-top: 6px;
+            font-weight: 700;
+            color: var(--text-strong);
+            font-family: 'Press Start 2P';
+        }
+
+        #title-wrap {
+            text-align: center;
+        }
+
+        #title-main {
+            font-family: 'Press Start 2P';
+            font-size: 20px;
+            letter-spacing: 0.25em;
+            background: linear-gradient(90deg, #4f46e5, #a855f7, #ec4899);
+            -webkit-background-clip: text;
+            color: transparent;
+            text-shadow: 0 0 18px rgba(129, 140, 248, 0.8);
+        }
+
+        #title-sub {
+            font-family: 'Press Start 2P';
+            font-size: 12px;
+            letter-spacing: 0.22em;
+            color: #93c5fd;
+        }
+
+        /* BOARD AREA */
+        #board-frame {
+            position: absolute;
+            top: 100px;
+            left: 10px;
+            right: 10px;
+            bottom: 15px;
+            border-radius: 26px;
+            background: radial-gradient(circle at top, #020617 0%, #020617 40%, #000 100%);
+            box-shadow:
+                inset 0 0 0 1px rgba(30, 64, 175, 0.4),
+                inset 0 8px 10px rgba(15, 23, 42, 0.9);
+            overflow: hidden;
+        }
+
+        canvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* LIGHTNING BUTTON – BLUE */
+        #lightning-btn {
+            position: absolute;
+            bottom: 32px;
+            left: 24px;
+            width: 48px;
+            height: 48px;
+            border-radius: 999px;
+            border: 2px solid rgba(191, 219, 254, 0.95);
+            background: radial-gradient(circle at 30% 20%, #dbeafe 0%, #60a5fa 30%, #1d4ed8 85%);
+            box-shadow:
+                0 0 6px rgba(59, 130, 246, 0.9),
+                0 0 14px rgba(37, 99, 235, 0.9),
+                0 0 26px rgba(191, 219, 254, 0.9);
+            font-size: 24px;
+            font-weight: 900;
+            color: #0b1120;
+            cursor: pointer;
+            z-index: 15;
+            display: none;
+            text-shadow: 0 0 4px rgba(248, 250, 252, 0.9);
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+        }
+
+        #lightning-btn.active {
+            box-shadow:
+                0 0 10px rgba(96, 165, 250, 1),
+                0 0 20px rgba(37, 99, 235, 1),
+                0 0 34px rgba(129, 140, 248, 0.9);
+            transform: scale(1.05);
+            border-color: rgba(191, 219, 254, 1);
+        }
+
+        #lightning-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* HOME SCREEN - dark blue, full */
+        #home-modal {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at top, #020617 0%, #020617 40%, #000 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            opacity: 0;
+            pointer-events: none;
+            transition: 0.25s ease;
+            border-radius: 0;
+        }
+
+        #home-modal.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        #home-modal h1 {
+            font-family: 'Varela Round';
+            font-size: 34px;
+            margin-bottom: 24px;
+            color: #e5e7eb;
+            letter-spacing: 0.16em;
+            text-shadow: 0 4px 16px rgba(15, 23, 42, 0.9);
+        }
+
+        #start-btn {
+            background: linear-gradient(135deg, #4f46e5, #ec4899);
+            border: none;
+            padding: 16px 64px;
+            color: white;
+            font-family: 'Varela Round';
+            font-size: 20px;
+            border-radius: 999px;
+            cursor: pointer;
+            box-shadow:
+                0 14px 0 rgba(15, 23, 42, 0.9),
+                0 24px 40px rgba(0, 0, 0, 0.9);
+            margin-bottom: 18px;
+        }
+
+        #start-btn:active {
+            transform: translateY(2px);
+            box-shadow:
+                0 10px 0 rgba(15, 23, 42, 0.9),
+                0 18px 30px rgba(0, 0, 0, 0.9);
+        }
+
+        .option-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 6px;
+            color: #e5e7eb;
+            font-size: 14px;
+        }
+
+        .option-row input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: #a855f7;
+        }
+
+        /* GAME OVER MODAL */
+        #gameover-modal {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.78);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 25;
+            opacity: 0;
+            pointer-events: none;
+            transition: 0.25s ease;
+        }
+
+        #gameover-modal.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        #gameover-modal h2 {
+            font-family: 'Varela Round';
+            font-size: 26px;
+            margin-bottom: 10px;
+            color: #f9fafb;
+            letter-spacing: 0.16em;
+        }
+
+        #gameover-modal .score-text {
+            font-size: 18px;
+            color: #e5e7eb;
+            margin-bottom: 24px;
+        }
+
+        #try-again-btn {
+            background: linear-gradient(135deg, #4f46e5, #ec4899);
+            border: none;
+            padding: 14px 52px;
+            color: white;
+            font-family: 'Varela Round';
+            font-size: 18px;
+            border-radius: 999px;
+            cursor: pointer;
+            box-shadow:
+                0 10px 0 rgba(15, 23, 42, 0.9),
+                0 20px 32px rgba(0, 0, 0, 0.9);
+        }
+
+        #try-again-btn:active {
+            transform: translateY(2px);
+            box-shadow:
+                0 7px 0 rgba(15, 23, 42, 0.9),
+                0 14px 24px rgba(0, 0, 0, 0.9);
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="game-container">
+
+        <!-- HUD -->
+        <div id="ui-layer">
+            <div class="score-box">
+                <div class="score-label">SCORE</div>
+                <div class="score-value" id="score">0</div>
+            </div>
+
+            <div id="title-wrap">
+                <div id="title-main">BUBBLE</div>
+                <div id="title-sub">PRO</div>
+            </div>
+
+            <div class="score-box">
+                <div class="score-label">HIGH</div>
+                <div class="score-value" id="high-score">0</div>
+            </div>
+        </div>
+
+        <!-- BOARD -->
+        <div id="board-frame">
+            <canvas id="gameCanvas"></canvas>
+        </div>
+
+        <!-- Lightning Power Button -->
+        <button id="lightning-btn">⚡</button>
+
+        <!-- HOME SCREEN -->
+        <div id="home-modal" class="active">
+            <h1>BUBBLE PRO</h1>
+
+            <!-- Start button first -->
+            <button id="start-btn">START</button>
+
+            <!-- Sound below Start button -->
+            <div class="option-row">
+                <input type="checkbox" id="sound-toggle" checked />
+                <label for="sound-toggle">Sound</label>
+            </div>
+        </div>
+
+        <!-- GAME OVER SCREEN -->
+        <div id="gameover-modal">
+            <h2>BUBBLE PRO</h2>
+            <div class="score-text" id="gameover-score">SCORE: 0</div>
+            <button id="try-again-btn">TRY AGAIN</button>
+        </div>
+    </div>
+
+    <script>
+        /********************************************************************************************
+         * BUBBLE PRO
+         * - Unlimited rows from ceiling, continuous fall.
+         * - Game over when any bubble touches danger line.
+         * - Thick dotted aim line.
+         * - Lightning: blue, same ball in shooter, bursts max 20 bubbles along its zig-zag path,
+         *   bouncing off side walls, then disappears.
+         * - Faster falling unsupported bubbles.
+         ********************************************************************************************/
+
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        const scoreEl = document.getElementById("score");
+        const highScoreEl = document.getElementById("high-score");
+
+        const homeModal = document.getElementById("home-modal");
+        const startBtn = document.getElementById("start-btn");
+
+        const gameOverModal = document.getElementById("gameover-modal");
+        const gameOverScoreEl = document.getElementById("gameover-score");
+        const tryAgainBtn = document.getElementById("try-again-btn");
+
+        const soundToggle = document.getElementById("sound-toggle");
+        const lightningBtn = document.getElementById("lightning-btn");
+
+        const COLORS = [{
+                base: "#48dbfb",
+                dark: "#0abde3"
+            },
+            {
+                base: "#ff6b6b",
+                dark: "#ee5253"
+            },
+            {
+                base: "#1dd1a1",
+                dark: "#10ac84"
+            },
+            {
+                base: "#f368e0",
+                dark: "#c445b0"
+            },
+            {
+                base: "#feca57",
+                dark: "#ff9f43"
+            },
+            {
+                base: "#5f27cd",
+                dark: "#341f97"
+            }
+        ];
+
+        const GRID_COLS = 8;
+        const INITIAL_ROWS = 14;
+
+        let WIDTH = 0,
+            HEIGHT = 0;
+        let BUBBLE_RADIUS = 0;
+        let ROW_HEIGHT = 0;
+
+        const MM_TO_PX = 96 / 25.4;
+        const DANGER_OFFSET_PX = 2 * MM_TO_PX;
+        let dangerLineY = 0;
+
+        let grid = [];
+        let score = 0;
+        let highScore = 0;
+
+        let floatingBubbles = [];
+        let burstParticles = [];
+
+        let isAiming = false;
+        let cannonAngle = -Math.PI / 2;
+
+        let bullet = null;
+        let nextBulletColor = null;
+
+        let gridOffsetY = 0;
+        let rowSpawnAccumulator = 0;
+        let animationId = null;
+        const GRID_FALL_SPEED = 0.05;
+
+        // Lightning as special shot
+        let lightningGroupCounter = 0;
+        let lightningAvailable = false;
+        let lightningLoaded = false;
+
+        // stagger parity
+        let rowParityOffset = 0;
+
+        let hasGameStarted = false;
+
+        /**********************
+         * SOUND
+         *********************/
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+        let soundEnabled = true;
+        let idleOsc = null;
+        let idleGain = null;
+
+        (function initSoundSetting() {
+            const saved = localStorage.getItem("bubbleSound");
+            if (saved !== null) {
+                soundEnabled = saved === "1";
+                soundToggle.checked = soundEnabled;
+            }
+        })();
+        soundToggle.addEventListener("change", () => {
+            soundEnabled = soundToggle.checked;
+            localStorage.setItem("bubbleSound", soundEnabled ? "1" : "0");
+            if (!soundEnabled) {
+                stopIdleSound();
+            } else if (!hasGameStarted) {
+                startIdleSound();
+            }
+        });
+
+        function ensureAudioContext() {
+            if (!audioCtx && AudioContext && soundEnabled) {
+                audioCtx = new AudioContext();
+            }
+        }
+
+        function playSoftTone(freq, startOffset = 0, duration = 0.15, type = "sine", volume = 0.06) {
+            if (!soundEnabled || !AudioContext) return;
+            ensureAudioContext();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+
+            osc.type = type;
+            osc.frequency.value = freq;
+            gain.gain.value = volume;
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime + startOffset;
+            osc.start(now);
+            gain.gain.setValueAtTime(volume, now);
+            gain.gain.linearRampToValueAtTime(0.001, now + duration);
+            osc.stop(now + duration + 0.02);
+        }
+
+        function playSound(kind) {
+            if (!soundEnabled) return;
+
+            switch (kind) {
+                case "shot":
+                    playSoftTone(880, 0, 0.08, "sine", 0.05);
+                    playSoftTone(1040, 0.03, 0.06, "sine", 0.04);
+                    break;
+                case "burst":
+                    playSoftTone(620, 0, 0.10, "sine", 0.04);
+                    playSoftTone(780, 0.03, 0.12, "sine", 0.04);
+                    playSoftTone(980, 0.06, 0.10, "sine", 0.03);
+                    break;
+                case "start":
+                    playSoftTone(520, 0, 0.14, "sine", 0.05);
+                    playSoftTone(660, 0.14, 0.16, "sine", 0.05);
+                    playSoftTone(820, 0.28, 0.18, "sine", 0.05);
+                    break;
+                case "over":
+                    playSoftTone(640, 0, 0.18, "triangle", 0.05);
+                    playSoftTone(420, 0.14, 0.22, "triangle", 0.045);
+                    playSoftTone(260, 0.30, 0.26, "sine", 0.04);
+                    break;
+            }
+        }
+
+        function startIdleSound() {
+            if (!soundEnabled || hasGameStarted || !AudioContext) return;
+            ensureAudioContext();
+            if (idleOsc) return;
+
+            idleOsc = audioCtx.createOscillator();
+            idleGain = audioCtx.createGain();
+            idleOsc.type = "sine";
+            idleOsc.frequency.value = 360;
+            idleGain.gain.value = 0.02;
+
+            idleOsc.connect(idleGain);
+            idleGain.connect(audioCtx.destination);
+            idleOsc.start();
+        }
+
+        function stopIdleSound() {
+            if (idleOsc) {
+                try {
+                    idleOsc.stop();
+                } catch (e) {}
+                idleOsc.disconnect();
+                idleGain.disconnect();
+                idleOsc = null;
+                idleGain = null;
+            }
+        }
+
+        /**********************
+         * RESIZE
+         *********************/
+        function resize() {
+            const board = document.getElementById("board-frame");
+            const rect = board.getBoundingClientRect();
+
+            WIDTH = rect.width;
+            HEIGHT = rect.height;
+            canvas.width = WIDTH;
+            canvas.height = HEIGHT;
+
+            const innerWidth = WIDTH - 4;
+            BUBBLE_RADIUS = innerWidth / (GRID_COLS * 2 + 1);
+            ROW_HEIGHT = BUBBLE_RADIUS * Math.sqrt(3);
+        }
+        window.addEventListener("resize", resize);
+        resize();
+
+        /**********************
+         * BUBBLE CLASS
+         *********************/
+        class Bubble {
+            constructor(r, c, colorIndex) {
+                this.r = r;
+                this.c = c;
+                this.colorIndex = colorIndex;
+                this.updatePosition();
+            }
+
+            updatePosition() {
+                const worldRow = this.r + rowParityOffset;
+                const shifted = (worldRow % 2 === 1);
+                const shift = shifted ? BUBBLE_RADIUS : 0;
+
+                this.x = BUBBLE_RADIUS + (this.c * BUBBLE_RADIUS * 2) + shift + 2;
+                this.y = BUBBLE_RADIUS + (this.r * ROW_HEIGHT) + gridOffsetY;
+            }
+
+            draw() {
+                const col = COLORS[this.colorIndex];
+                const grad = ctx.createRadialGradient(
+                    this.x - BUBBLE_RADIUS * 0.3,
+                    this.y - BUBBLE_RADIUS * 0.3,
+                    BUBBLE_RADIUS * 0.1,
+                    this.x,
+                    this.y,
+                    BUBBLE_RADIUS
+                );
+                grad.addColorStop(0, "#ffffff");
+                grad.addColorStop(0.2, col.base);
+                grad.addColorStop(1, col.dark);
+
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, BUBBLE_RADIUS, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.arc(
+                    this.x - BUBBLE_RADIUS * 0.35,
+                    this.y - BUBBLE_RADIUS * 0.35,
+                    BUBBLE_RADIUS * 0.2,
+                    0, Math.PI * 2
+                );
+                ctx.fillStyle = "rgba(255,255,255,0.35)";
+                ctx.fill();
+            }
+        }
+
+        /**********************
+         * PARTICLES
+         *********************/
+        function spawnBurst(x, y, colorIndex) {
+            const count = 12;
+            for (let i = 0; i < count; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = 1.5 + Math.random() * 2.2;
+                burstParticles.push({
+                    x,
+                    y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed - 0.5,
+                    life: 1,
+                    colorIndex
+                });
+            }
+        }
+
+        /**********************
+         * GRID HELPERS
+         *********************/
+        function addRowAtTop() {
+            const newRow = [];
+            for (let c = 0; c < GRID_COLS; c++) {
+                const clr = Math.floor(Math.random() * COLORS.length);
+                newRow[c] = new Bubble(0, c, clr);
+            }
+            grid.unshift(newRow);
+
+            for (let r = 0; r < grid.length; r++) {
+                for (let c = 0; c < GRID_COLS; c++) {
+                    if (grid[r][c]) {
+                        grid[r][c].r = r;
+                    }
+                }
+            }
+
+            rowParityOffset = (rowParityOffset + 1) % 2;
+        }
+
+        function updateAllBubblePositions() {
+            for (let r = 0; r < grid.length; r++) {
+                for (let c = 0; c < GRID_COLS; c++) {
+                    if (grid[r][c]) grid[r][c].updatePosition();
+                }
+            }
+        }
+
+        /**********************
+         * FLOATING BUBBLES
+         *********************/
+        function findFloating() {
+            const visited = new Set();
+            const stack = [];
+
+            if (grid.length === 0) return [];
+
+            for (let c = 0; c < GRID_COLS; c++) {
+                const b = grid[0][c];
+                if (b) {
+                    const key = "0," + c;
+                    visited.add(key);
+                    stack.push(b);
+                }
+            }
+
+            while (stack.length) {
+                const cur = stack.pop();
+                const neighbors = getNeighbors(cur.r, cur.c);
+                for (let n of neighbors) {
+                    const b = grid[n.r][n.c];
+                    if (!b) continue;
+                    const key = n.r + "," + n.c;
+                    if (visited.has(key)) continue;
+                    visited.add(key);
+                    stack.push(b);
+                }
+            }
+
+            const floating = [];
+            for (let r = 0; r < grid.length; r++) {
+                for (let c = 0; c < GRID_COLS; c++) {
+                    const b = grid[r][c];
+                    if (!b) continue;
+                    const key = r + "," + c;
+                    if (!visited.has(key)) {
+                        floating.push(b);
+                    }
+                }
+            }
+            return floating;
+        }
+
+        function dropFloating(list) {
+            for (let b of list) {
+                if (!grid[b.r]) continue;
+                grid[b.r][b.c] = null;
+                floatingBubbles.push({
+                    x: b.x,
+                    y: b.y,
+                    vy: 0,
+                    colorIndex: b.colorIndex
+                });
+            }
+        }
+
+        function handleFloating() {
+            const orphans = findFloating();
+            if (orphans.length > 0) {
+                for (let fb of orphans) {
+                    spawnBurst(fb.x, fb.y, fb.colorIndex);
+                }
+                dropFloating(orphans);
+            }
+        }
+
+        /**********************
+         * INIT GAME
+         *********************/
+        function initGame() {
+            if (animationId) cancelAnimationFrame(animationId);
+
+            hasGameStarted = true;
+            stopIdleSound();
+
+            gameOverModal.classList.remove("active");
+            homeModal.classList.remove("active");
+
+            grid = [];
+            floatingBubbles = [];
+            burstParticles = [];
+            score = 0;
+            gridOffsetY = -ROW_HEIGHT;
+            rowSpawnAccumulator = 0;
+            rowParityOffset = 0;
+
+            lightningGroupCounter = 0;
+            lightningAvailable = false;
+            lightningLoaded = false;
+            lightningBtn.style.display = "none";
+            lightningBtn.classList.remove("active");
+
+            scoreEl.innerText = score;
+
+            highScore = Number(localStorage.getItem("bubbleHigh")) || 0;
+            highScoreEl.innerText = highScore;
+
+            for (let r = 0; r < INITIAL_ROWS; r++) {
+                grid[r] = [];
+                for (let c = 0; c < GRID_COLS; c++) {
+                    if (r < 5) {
+                        const clr = Math.floor(Math.random() * COLORS.length);
+                        grid[r][c] = new Bubble(r, c, clr);
+                    } else {
+                        grid[r][c] = null;
+                    }
+                }
+            }
+
+            nextBulletColor = Math.floor(Math.random() * COLORS.length);
+            spawnBullet();
+
+            playSound("start");
+            gameLoop();
+        }
+
+        /**********************
+         * BULLET
+         *********************/
+        function spawnBullet() {
+            const clr = nextBulletColor;
+            nextBulletColor = Math.floor(Math.random() * COLORS.length);
+
+            bullet = {
+                x: WIDTH / 2,
+                y: HEIGHT - BUBBLE_RADIUS * 2,
+                vx: 0,
+                vy: 0,
+                dirX: 0,
+                dirY: -1,
+                colorIndex: clr,
+                active: false,
+                lightning: false
+            };
+        }
+
+        function shoot() {
+            if (!bullet || bullet.active) return;
+
+            const dirX = Math.cos(cannonAngle);
+            const dirY = Math.sin(cannonAngle);
+            const speed = WIDTH / 28;
+            bullet.vx = dirX * speed;
+            bullet.vy = dirY * speed;
+            bullet.dirX = dirX;
+            bullet.dirY = dirY;
+            bullet.active = true;
+
+            playSound("shot");
+        }
+
+        /**********************
+         * SNAP / NEIGHBORS
+         *********************/
+        function snapToGrid(b) {
+            if (grid.length === 0) return null;
+
+            let r = Math.round((b.y - gridOffsetY - BUBBLE_RADIUS) / ROW_HEIGHT);
+            r = Math.max(0, Math.min(grid.length - 1, r));
+
+            const worldRow = r + rowParityOffset;
+            const shifted = (worldRow % 2 === 1);
+            const shift = shifted ? BUBBLE_RADIUS : 0;
+
+            let c = Math.round((b.x - shift - BUBBLE_RADIUS - 2) / (BUBBLE_RADIUS * 2));
+            c = Math.max(0, Math.min(GRID_COLS - 1, c));
+
+            if (grid[r][c]) return null;
+            return {
+                r,
+                c
+            };
+        }
+
+        function getNeighbors(r, c) {
+            const worldRow = r + rowParityOffset;
+            const isEven = (worldRow % 2 === 0);
+
+            const dirsEven = [
+                [-1, 0],
+                [-1, -1],
+                [0, -1],
+                [0, 1],
+                [1, 0],
+                [1, -1]
+            ];
+            const dirsOdd = [
+                [-1, 0],
+                [-1, 1],
+                [0, -1],
+                [0, 1],
+                [1, 0],
+                [1, 1]
+            ];
+
+            const dirs = isEven ? dirsEven : dirsOdd;
+            const list = [];
+            for (const [dr, dc] of dirs) {
+                const nr = r + dr,
+                    nc = c + dc;
+                if (nr >= 0 && nr < grid.length && nc >= 0 && nc < GRID_COLS) {
+                    list.push({
+                        r: nr,
+                        c: nc
+                    });
+                }
+            }
+            return list;
+        }
+
+        /**********************
+         * CLUSTER
+         *********************/
+        function findCluster(r, c, colorIndex) {
+            const visited = new Set();
+            const stack = [{
+                r,
+                c
+            }];
+            const cluster = [];
+
+            while (stack.length) {
+                const {
+                    r,
+                    c
+                } = stack.pop();
+                const key = r + "," + c;
+                if (visited.has(key)) continue;
+                visited.add(key);
+
+                if (!grid[r]) continue;
+                const b = grid[r][c];
+                if (!b || b.colorIndex !== colorIndex) continue;
+
+                cluster.push(b);
+
+                for (let nb of getNeighbors(r, c)) {
+                    stack.push(nb);
+                }
+            }
+            return cluster;
+        }
+
+        /**********************
+         * POP CLUSTER
+         *********************/
+        function popCluster(list, countForLightning = true) {
+            if (list.length === 0) return;
+
+            for (let b of list) {
+                if (!grid[b.r]) continue;
+                if (grid[b.r][b.c] !== b) continue;
+                grid[b.r][b.c] = null;
+                score += 10;
+                spawnBurst(b.x, b.y, b.colorIndex);
+            }
+            scoreEl.innerText = score;
+
+            if (countForLightning) {
+                lightningGroupCounter++;
+                if (!lightningAvailable && lightningGroupCounter >= 12) {
+                    lightningAvailable = true;
+                    lightningBtn.style.display = "block";
+                }
+            }
+
+            playSound("burst");
+        }
+
+        /**********************
+         * PLACE BULLET
+         *********************/
+        function placeBullet() {
+            if (!bullet) return;
+            bullet.active = false;
+
+            const snapPos = snapToGrid(bullet);
+            if (!snapPos) return gameOver();
+
+            // LIGHTNING SHOT: travels zig-zag (bouncing off side walls),
+            // bursting up to 20 bubbles along its path before disappearing.
+            if (bullet.lightning) {
+                let dirX = bullet.dirX;
+                let dirY = bullet.dirY;
+                if (dirX === 0 && dirY === 0) {
+                    dirX = 0;
+                    dirY = -1;
+                }
+
+                const step = BUBBLE_RADIUS * 1.1;
+                const maxHits = 20;
+                const popped = [];
+                const seen = new Set();
+
+                let px = bullet.x;
+                let py = bullet.y;
+                let safety = 0;
+
+                while (popped.length < maxHits && safety < 2000) {
+                    safety++;
+
+                    px += dirX * step;
+                    py += dirY * step;
+
+                    // bounce off side walls for zig-zag path
+                    if (px < BUBBLE_RADIUS) {
+                        px = BUBBLE_RADIUS;
+                        dirX *= -1;
+                    } else if (px > WIDTH - BUBBLE_RADIUS) {
+                        px = WIDTH - BUBBLE_RADIUS;
+                        dirX *= -1;
+                    }
+
+                    // leave board vertically => lightning disappears
+                    if (py < 0 || py > HEIGHT) break;
+
+                    for (let r = 0; r < grid.length; r++) {
+                        for (let c = 0; c < GRID_COLS; c++) {
+                            const b = grid[r][c];
+                            if (!b) continue;
+                            const dx = b.x - px;
+                            const dy = b.y - py;
+                            const d = Math.sqrt(dx * dx + dy * dy);
+                            if (d < BUBBLE_RADIUS * 1.4) {
+                                const key = r + "," + c;
+                                if (!seen.has(key)) {
+                                    seen.add(key);
+                                    popped.push(b);
+                                    if (popped.length >= maxHits) break;
+                                }
+                            }
+                        }
+                        if (popped.length >= maxHits) break;
+                    }
+                }
+
+                popCluster(popped, false);
+                handleFloating();
+
+                lightningLoaded = false;
+                spawnBullet();
+                return;
+            }
+
+            // normal bubble
+            const newB = new Bubble(snapPos.r, snapPos.c, bullet.colorIndex);
+            grid[snapPos.r][snapPos.c] = newB;
+
+            const cluster = findCluster(snapPos.r, snapPos.c, bullet.colorIndex);
+            if (cluster.length >= 3) {
+                popCluster(cluster, true);
+                handleFloating();
+            }
+
+            spawnBullet();
+        }
+
+        /**********************
+         * LIGHTNING POWER – load into cannon
+         *********************/
+        function activateLightning() {
+            if (!lightningAvailable || !bullet || bullet.active) return;
+
+            lightningAvailable = false;
+            lightningLoaded = true;
+            lightningGroupCounter = 0;
+            lightningBtn.style.display = "none";
+            lightningBtn.classList.remove("active");
+
+            // Turn CURRENT waiting bubble into the lightning ball
+            bullet.lightning = true;
+            bullet.colorIndex = null; // ignore normal color for draw, use lightning style
+        }
+        lightningBtn.addEventListener("click", () => {
+            activateLightning();
+        });
+
+        function updateLightningButton() {
+            if (lightningAvailable) {
+                lightningBtn.style.display = "block";
+                lightningBtn.classList.add("active");
+            } else {
+                lightningBtn.classList.remove("active");
+            }
+        }
+
+        /**********************
+         * UPDATE
+         *********************/
+        function update() {
+            // ceiling fall
+            gridOffsetY += GRID_FALL_SPEED;
+            rowSpawnAccumulator += GRID_FALL_SPEED;
+
+            if (rowSpawnAccumulator >= ROW_HEIGHT) {
+                rowSpawnAccumulator -= ROW_HEIGHT;
+                addRowAtTop();
+                gridOffsetY -= ROW_HEIGHT;
+            }
+
+            updateAllBubblePositions();
+
+            // floating bubbles fall faster
+            for (let i = floatingBubbles.length - 1; i >= 0; i--) {
+                const fb = floatingBubbles[i];
+                fb.vy += 0.7;
+                fb.y += fb.vy;
+                if (fb.y - BUBBLE_RADIUS > HEIGHT) {
+                    floatingBubbles.splice(i, 1);
+                }
+            }
+
+            // particles
+            for (let i = burstParticles.length - 1; i >= 0; i--) {
+                const p = burstParticles[i];
+                p.vx *= 0.98;
+                p.vy += 0.18;
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life -= 0.03;
+                if (p.life <= 0) {
+                    burstParticles.splice(i, 1);
+                }
+            }
+
+            const shooterY = HEIGHT - BUBBLE_RADIUS * 2;
+            dangerLineY = shooterY - Math.max(DANGER_OFFSET_PX, BUBBLE_RADIUS * 1.2);
+
+            // game over if any bubble touches danger line
+            for (let r = 0; r < grid.length; r++) {
+                for (let c = 0; c < GRID_COLS; c++) {
+                    const b = grid[r][c];
+                    if (b && (b.y + BUBBLE_RADIUS) >= dangerLineY) {
+                        gameOver();
+                        return;
+                    }
+                }
+            }
+
+            updateLightningButton();
+
+            if (bullet && bullet.active) {
+                bullet.x += bullet.vx;
+                bullet.y += bullet.vy;
+
+                if (bullet.x < BUBBLE_RADIUS) {
+                    bullet.x = BUBBLE_RADIUS;
+                    bullet.vx *= -1;
+                    bullet.dirX *= -1;
+                } else if (bullet.x > WIDTH - BUBBLE_RADIUS) {
+                    bullet.x = WIDTH - BUBBLE_RADIUS;
+                    bullet.vx *= -1;
+                    bullet.dirX *= -1;
+                }
+
+                if (bullet.y < BUBBLE_RADIUS) {
+                    placeBullet();
+                    return;
+                }
+
+                for (let r = 0; r < grid.length; r++) {
+                    for (let c = 0; c < GRID_COLS; c++) {
+                        const b = grid[r][c];
+                        if (!b) continue;
+                        const dx = bullet.x - b.x;
+                        const dy = bullet.y - b.y;
+                        if (Math.sqrt(dx * dx + dy * dy) < BUBBLE_RADIUS * 1.9) {
+                            placeBullet();
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+
+        /**********************
+         * DRAW
+         *********************/
+        function draw() {
+            ctx.clearRect(0, 0, WIDTH, HEIGHT);
+
+            // danger line
+            ctx.save();
+            ctx.strokeStyle = "rgba(255,255,255,0.6)";
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([6, 6]);
+            ctx.beginPath();
+            ctx.moveTo(10, dangerLineY);
+            ctx.lineTo(WIDTH - 10, dangerLineY);
+            ctx.stroke();
+            ctx.restore();
+
+            // grid bubbles
+            for (let r = 0; r < grid.length; r++) {
+                for (let c = 0; c < GRID_COLS; c++) {
+                    if (grid[r][c]) grid[r][c].draw();
+                }
+            }
+
+            // floating bubbles
+            for (let fb of floatingBubbles) {
+                const col = COLORS[fb.colorIndex];
+                const grad = ctx.createRadialGradient(
+                    fb.x - BUBBLE_RADIUS * 0.3,
+                    fb.y - BUBBLE_RADIUS * 0.3,
+                    BUBBLE_RADIUS * 0.1,
+                    fb.x,
+                    fb.y,
+                    BUBBLE_RADIUS
+                );
+                grad.addColorStop(0, "#ffffff");
+                grad.addColorStop(0.2, col.base);
+                grad.addColorStop(1, col.dark);
+
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.arc(fb.x, fb.y, BUBBLE_RADIUS, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.arc(
+                    fb.x - BUBBLE_RADIUS * 0.35,
+                    fb.y - BUBBLE_RADIUS * 0.35,
+                    BUBBLE_RADIUS * 0.2,
+                    0, Math.PI * 2
+                );
+                ctx.fillStyle = "rgba(255,255,255,0.4)";
+                ctx.fill();
+            }
+
+            // color burst particles
+            for (let p of burstParticles) {
+                const baseCol = COLORS[p.colorIndex].base;
+                ctx.save();
+                ctx.globalAlpha = p.life * 0.85;
+                ctx.fillStyle = baseCol;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, BUBBLE_RADIUS * 0.18, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+
+            // dotted aim line (thicker)
+            if (bullet && !bullet.active && isAiming) drawAimLine();
+
+            // shooter bubble / lightning
+            if (bullet) {
+                if (bullet.lightning) {
+                    // lightning look
+                    const grad = ctx.createRadialGradient(
+                        bullet.x - BUBBLE_RADIUS * 0.3,
+                        bullet.y - BUBBLE_RADIUS * 0.3,
+                        BUBBLE_RADIUS * 0.1,
+                        bullet.x,
+                        bullet.y,
+                        BUBBLE_RADIUS
+                    );
+                    grad.addColorStop(0, "#ffffff");
+                    grad.addColorStop(0.2, "#bbddff");
+                    grad.addColorStop(1, "#0070ff");
+
+                    ctx.save();
+                    ctx.shadowColor = "rgba(0,120,255,1)";
+                    ctx.shadowBlur = 25;
+                    ctx.fillStyle = grad;
+                    ctx.beginPath();
+                    ctx.arc(bullet.x, bullet.y, BUBBLE_RADIUS, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                } else {
+                    const col = COLORS[bullet.colorIndex];
+                    const grad = ctx.createRadialGradient(
+                        bullet.x - BUBBLE_RADIUS * 0.3,
+                        bullet.y - BUBBLE_RADIUS * 0.3,
+                        BUBBLE_RADIUS * 0.1,
+                        bullet.x,
+                        bullet.y,
+                        BUBBLE_RADIUS
+                    );
+                    grad.addColorStop(0, "#ffffff");
+                    grad.addColorStop(0.2, col.base);
+                    grad.addColorStop(1, col.dark);
+
+                    ctx.fillStyle = grad;
+                    ctx.beginPath();
+                    ctx.arc(bullet.x, bullet.y, BUBBLE_RADIUS, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            // NEXT bubble indicator (normal after lightning)
+            if (bullet && !bullet.active && nextBulletColor != null && !bullet.lightning) {
+                const nextCol = COLORS[nextBulletColor];
+                const nextX = WIDTH / 2 + BUBBLE_RADIUS * 3.2;
+                const nextY = HEIGHT - BUBBLE_RADIUS * 2;
+
+                const grad = ctx.createRadialGradient(
+                    nextX - BUBBLE_RADIUS * 0.21,
+                    nextY - BUBBLE_RADIUS * 0.21,
+                    BUBBLE_RADIUS * 0.1,
+                    nextX,
+                    nextY,
+                    BUBBLE_RADIUS * 0.7
+                );
+                grad.addColorStop(0, "#ffffff");
+                grad.addColorStop(0.2, nextCol.base);
+                grad.addColorStop(1, nextCol.dark);
+
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.arc(nextX, nextY, BUBBLE_RADIUS * 0.7, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.fillStyle = "white";
+                ctx.font = `${BUBBLE_RADIUS * 0.35}px 'Press Start 2P'`;
+                ctx.textAlign = "center";
+                ctx.fillText("NEXT", nextX, nextY + BUBBLE_RADIUS * 0.9);
+            }
+        }
+
+        /**********************
+         * AIM LINE
+         *********************/
+        function drawAimLine() {
+            const cx = WIDTH / 2;
+            const cy = HEIGHT - BUBBLE_RADIUS * 2;
+
+            let simX = cx;
+            let simY = cy;
+            let vx = Math.cos(cannonAngle);
+            let vy = Math.sin(cannonAngle);
+
+            ctx.save();
+            ctx.strokeStyle = "rgba(255,255,255,0.9)";
+            ctx.lineWidth = 3;
+            ctx.setLineDash([8, 6]);
+            ctx.beginPath();
+            ctx.moveTo(simX, simY);
+
+            const stepDist = BUBBLE_RADIUS * 1.5;
+            const maxSteps = 35;
+
+            for (let i = 0; i < maxSteps; i++) {
+                simX += vx * stepDist;
+                simY += vy * stepDist;
+
+                if (simX < BUBBLE_RADIUS) {
+                    simX = BUBBLE_RADIUS;
+                    vx *= -1;
+                } else if (simX > WIDTH - BUBBLE_RADIUS) {
+                    simX = WIDTH - BUBBLE_RADIUS;
+                    vx *= -1;
+                }
+
+                if (simY < BUBBLE_RADIUS) {
+                    simY = BUBBLE_RADIUS;
+                    ctx.lineTo(simX, simY);
+                    break;
+                }
+
+                let hit = false;
+                for (let r = 0; r < grid.length && !hit; r++) {
+                    for (let c = 0; c < GRID_COLS && !hit; c++) {
+                        const b = grid[r][c];
+                        if (!b) continue;
+                        const dx = simX - b.x;
+                        const dy = simY - b.y;
+                        if (Math.sqrt(dx * dx + dy * dy) < BUBBLE_RADIUS * 2.1) {
+                            hit = true;
+                        }
+                    }
+                }
+                ctx.lineTo(simX, simY);
+                if (hit) break;
+            }
+
+            ctx.stroke();
+            ctx.restore();
+        }
+
+        /**********************
+         * LOOP
+         *********************/
+        function gameLoop() {
+            update();
+            draw();
+            animationId = requestAnimationFrame(gameLoop);
+        }
+
+        /**********************
+         * INPUT
+         *********************/
+        function updateAim(x, y) {
+            const cx = WIDTH / 2;
+            const cy = HEIGHT - BUBBLE_RADIUS * 2;
+
+            const dx = x - cx;
+            const dy = y - cy;
+
+            let ang = Math.atan2(dy, dx);
+            if (ang > -0.2) ang = -0.2;
+            if (ang < -Math.PI + 0.2) ang = -Math.PI + 0.2;
+            cannonAngle = ang;
+        }
+
+        canvas.addEventListener("mousedown", e => {
+            isAiming = true;
+            updateAim(e.offsetX, e.offsetY);
+        });
+
+        canvas.addEventListener("mousemove", e => {
+            if (!isAiming) return;
+            updateAim(e.offsetX, e.offsetY);
+        });
+
+        window.addEventListener("mouseup", () => {
+            if (!isAiming) return;
+            isAiming = false;
+            shoot();
+        });
+
+        canvas.addEventListener("touchstart", e => {
+            const t = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            isAiming = true;
+            updateAim(t.clientX - rect.left, t.clientY - rect.top);
+        }, {
+            passive: false
+        });
+
+        canvas.addEventListener("touchmove", e => {
+            if (!isAiming) return;
+            const t = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            updateAim(t.clientX - rect.left, t.clientY - rect.top);
+        }, {
+            passive: false
+        });
+
+        canvas.addEventListener("touchend", () => {
+            if (!isAiming) return;
+            isAiming = false;
+            shoot();
+        }, {
+            passive: false
+        });
+
+        /**********************
+         * GAME OVER
+         *********************/
+        function gameOver() {
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem("bubbleHigh", highScore);
+                highScoreEl.innerText = highScore;
+            }
+
+            playSound("over");
+            gameOverScoreEl.innerText = "SCORE: " + score;
+            gameOverModal.classList.add("active");
+            hasGameStarted = false;
+            startIdleSound();
+        }
+
+        /**********************
+         * START / TRY AGAIN
+         *********************/
+        startBtn.addEventListener("click", initGame);
+        tryAgainBtn.addEventListener("click", initGame);
+
+        // gentle sound before first game
+        startIdleSound();
+
+        // Initial static draw
+        draw();
+    </script>
+
+</body>
+
+</html>
