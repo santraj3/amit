@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - Amit Academy Games</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#090d16',
+                        cardBg: '#111827',
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #090d16;
+            background-image: 
+                radial-gradient(at 10% 10%, hsla(250, 70%, 15%, 0.5) 0px, transparent 50%),
+                radial-gradient(at 90% 10%, hsla(210, 80%, 15%, 0.4) 0px, transparent 50%),
+                radial-gradient(at 50% 80%, hsla(280, 60%, 12%, 0.4) 0px, transparent 50%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            color: #f1f5f9;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #090d16;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen justify-between">
+
+    <!-- Header Navigation -->
+    <header class="w-full max-w-5xl mx-auto px-4 pt-6 pb-4 flex items-center justify-between gap-4">
+        <a href="https://amitacademy.in" class="flex items-center gap-3 group text-decoration-none">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-500 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-500/30 group-hover:scale-105 transition">
+                <i class="fa-solid fa-gamepad text-white text-lg"></i>
+            </div>
+            <div>
+                <span class="text-xs tracking-widest uppercase text-purple-400 font-bold block">Amit Academy</span>
+                <span class="text-xl font-extrabold text-white tracking-wide">Mini Games</span>
+            </div>
+        </a>
+
+        <a href="https://amitacademy.in" class="px-4 py-2 rounded-full bg-slate-900/80 border border-slate-700/80 text-slate-300 text-sm font-medium hover:text-white hover:border-purple-500 transition backdrop-blur-md">
+            <i class="fa-solid fa-house mr-1.5"></i> Home
+        </a>
+    </header>
+
+    <!-- Main Contact Content -->
+    <main class="w-full max-w-4xl mx-auto px-4 flex-grow py-8">
+        
+        <div class="text-center mb-10">
+            <h1 class="text-4xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400 mb-4 tracking-tight">
+                Contact Us
+            </h1>
+            <p class="text-slate-400 text-base sm:text-lg max-w-2xl mx-auto">
+                Have questions, feedback, or suggestions? We would love to hear from you!
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+            
+            <!-- Direct Email Card -->
+            <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 backdrop-blur-md text-center flex flex-col items-center justify-center">
+                <div class="w-12 h-12 rounded-full bg-purple-600/20 text-purple-400 flex items-center justify-center text-xl mb-4">
+                    <i class="fa-solid fa-envelope"></i>
+                </div>
+                <h3 class="text-white font-bold mb-1">Email Us</h3>
+                <p class="text-xs text-slate-400 mb-3">Drop us a line anytime</p>
+                <a href="mailto:sk93364074@gmail.com" class="text-purple-400 hover:underline text-xs sm:text-sm font-semibold break-all">
+                    sk93364074@gmail.com
+                </a>
+            </div>
+
+            <!-- Support Card -->
+            <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 backdrop-blur-md text-center flex flex-col items-center justify-center">
+                <div class="w-12 h-12 rounded-full bg-blue-600/20 text-blue-400 flex items-center justify-center text-xl mb-4">
+                    <i class="fa-solid fa-headset"></i>
+                </div>
+                <h3 class="text-white font-bold mb-1">Support Response</h3>
+                <p class="text-xs text-slate-400 mb-3">Estimated reply time</p>
+                <span class="text-slate-200 text-sm font-semibold">Within 24 Hours</span>
+            </div>
+
+            <!-- Website Card -->
+            <div class="bg-slate-900/80 border border-slate-800 rounded-2xl p-6 backdrop-blur-md text-center flex flex-col items-center justify-center">
+                <div class="w-12 h-12 rounded-full bg-pink-600/20 text-pink-400 flex items-center justify-center text-xl mb-4">
+                    <i class="fa-solid fa-globe"></i>
+                </div>
+                <h3 class="text-white font-bold mb-1">Official Website</h3>
+                <p class="text-xs text-slate-400 mb-3">Explore more games</p>
+                <a href="https://amitacademy.in" class="text-pink-400 hover:underline text-xs sm:text-sm font-semibold">
+                    amitacademy.in
+                </a>
+            </div>
+
+        </div>
+
+        <!-- Optional Quick Contact Box / Form Layout -->
+        <div class="bg-slate-900/80 border border-slate-800/80 rounded-3xl p-6 sm:p-10 backdrop-blur-md shadow-xl text-center">
+            <h2 class="text-2xl font-bold text-white mb-3">Get in Touch Directly</h2>
+            <p class="text-slate-400 text-sm sm:text-base max-w-lg mx-auto mb-6">
+                If you are facing any issues with the games or want to share your valuable feedback, please click the button below to send us an email directly through your mail app.
+            </p>
+            <a href="mailto:sk93364074@gmail.com?subject=Feedback%20/%20Query%20-%20Amit%20Academy%20Games" class="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold shadow-lg shadow-purple-600/30 hover:scale-105 transition">
+                <i class="fa-solid fa-paper-plane"></i> Send Email
+            </a>
+        </div>
+
+    </main>
+
+    <!-- Footer Section -->
+    <footer class="w-full bg-slate-950/80 border-t border-slate-900 pt-10 pb-8 mt-auto">
+        <div class="w-full max-w-5xl mx-auto px-4 flex flex-col items-center text-center">
+            
+            <a href="https://amitacademy.in" class="text-lg font-bold text-white mb-2 flex items-center gap-2">
+                <i class="fa-solid fa-gamepad text-purple-500"></i> Amit Academy
+            </a>
+            <p class="text-slate-400 text-xs sm:text-sm max-w-md mb-6">
+                Your ultimate destination for fast, fun and responsive browser-based mini-games.
+            </p>
+
+            <div class="flex flex-wrap justify-center gap-6 mb-8 text-slate-300 text-xs sm:text-sm font-medium">
+                <a href="https://amitacademy.in" class="hover:text-purple-400 transition">Home</a>
+                <a href="https://amitacademy.in/about.html" class="hover:text-purple-400 transition">About Us</a>
+                <a href="https://amitacademy.in/contact.html" class="hover:text-purple-400 transition text-purple-400">Contact Us</a>
+                <a href="https://amitacademy.in/privacy.html" class="hover:text-purple-400 transition">Privacy Policy</a>
+                <a href="https://amitacademy.in/terms.html" class="hover:text-purple-400 transition">Terms & Conditions</a>
+            </div>
+
+            <div class="w-full border-t border-slate-900 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+                <p>&copy; 2026 Amit Academy. All rights reserved.</p>
+                <div class="flex items-center gap-4">
+                    <span class="inline-flex items-center gap-1.5 text-slate-400 font-medium">
+                        <i class="fa-solid fa-shield-halved text-emerald-400"></i> Secure & Safe
+                    </span>
+                </div>
+            </div>
+
+        </div>
+    </footer>
+
+</body>
+</html>
