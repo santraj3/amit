@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Realistic Fruit Orbit Slash</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: radial-gradient(circle at center, #0f2b33 0%, #06151a 100%);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: #fff;
+    }
+    #game-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      overflow: hidden;
+      background: radial-gradient(circle at 50% 35%, #153c47 0%, #0b2027 60%, #051115 100%);
+      box-shadow: 0 0 50px rgba(0, 0, 0, 0.85);
+    }
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      z-index: 1;
+    }
+    .hud {
+      position: absolute;
+      top: env(safe-area-inset-top, 14px);
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      z-index: 10;
+      pointer-events: none;
+    }
+    .hud-box {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 24px;
+      font-weight: 900;
+      color: #f6e58d;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+    }
+    .hud-stage {
+      text-align: center;
+      font-size: 16px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      color: #ffd32a;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.9);
+    }
+    .hud-stage span {
+      display: block;
+      font-size: 10px;
+      font-weight: 700;
+      color: #70a1ff;
+      letter-spacing: 1.5px;
+    }
+    .sound-btn {
+      position: absolute;
+      top: env(safe-area-inset-top, 16px);
+      right: 18px;
+      margin-top: 56px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(15, 43, 51, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 20;
+      font-size: 18px;
+      color: #ffd32a;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+      backdrop-filter: blur(8px);
+      transition: transform 0.1s ease;
+    }
+    .sound-btn:active {
+      transform: scale(0.9);
+    }
+    .screen {
+      position: absolute;
+      inset: 0;
+      background: rgba(5, 17, 21, 0.92);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+      padding: 24px;
+      text-align: center;
+    }
+    .screen.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .screen h1 {
+      font-size: 32px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+      text-shadow: 0 4px 16px rgba(0,0,0,0.8);
+    }
+    .title-start { color: #2ed573; }
+    .title-win   { color: #ffa502; }
+    .title-over  { color: #ff4757; }
+    .screen p {
+      font-size: 14px;
+      color: #cbd5e1;
+      margin-bottom: 22px;
+      max-width: 290px;
+      line-height: 1.5;
+    }
+    .stat-badge {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 16px;
+      padding: 14px 24px;
+      margin-bottom: 22px;
+      min-width: 210px;
+    }
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      margin: 6px 0;
+      font-size: 15px;
+      font-weight: 600;
+    }
+    .stat-row span:last-child {
+      color: #ffd32a;
+      font-weight: 800;
+    }
+    .btn {
+      background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%);
+      color: #fff;
+      border: none;
+      padding: 15px 44px;
+      font-size: 17px;
+      font-weight: 900;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 8px 25px rgba(234, 88, 12, 0.45);
+      letter-spacing: 1px;
+      transition: transform 0.15s ease, filter 0.15s ease;
+    }
+    .btn:hover {
+      filter: brightness(1.1);
+    }
+    .btn:active {
+      transform: scale(0.95);
+    }
+  </style>
+</head>
+<body>
+  <div id="game-container">
+    <canvas id="canvas"></canvas>
+
+    <div class="hud">
+      <div class="hud-box">
+        <span style="font-size: 24px;">🎯</span>
+        <span id="score-val">0</span>
+      </div>
+      <div class="hud-stage">
+        <span id="diff-label">EASY</span>
+        <div id="stage-val">STAGE 1</div>
+      </div>
+      <div class="hud-box" style="color: #ffd32a;">
+        <span style="font-size: 13px; color: #94a3b8; font-weight: 700;">BEST:</span>
+        <span id="best-val">0</span>
+      </div>
+    </div>
+
+    <button class="sound-btn" id="sound-toggle" aria-label="Toggle Sound">🔊</button>
+
+    <div class="screen active" id="start-screen">
+      <div style="font-size: 42px; margin-bottom: 8px;">🍌🍎🍊</div>
+      <h1 class="title-start">FRUIT SLASH</h1>
+      <p>Ghoomte hue realistic fruits ko knife se kaatein! Knife upar tak jaati hai aur apne raste ke sabhi fruits ko slice karegi.</p>
+      <div class="stat-badge">
+        <div class="stat-row"><span>High Score</span><span id="start-best">0</span></div>
+      </div>
+      <button class="btn" id="start-btn">PLAY NOW</button>
+    </div>
+
+    <div class="screen" id="win-screen">
+      <div style="font-size: 42px; margin-bottom: 8px;">✨🎉</div>
+      <h1 class="title-win">STAGE CLEARED!</h1>
+      <p id="win-msg">Zabardast throw! Agle level me speed aur rotation aur kathin hogi.</p>
+      <div class="stat-badge">
+        <div class="stat-row"><span>Fruits Sliced</span><span id="win-fruits">+0</span></div>
+        <div class="stat-row"><span>Total Score</span><span id="win-score">0</span></div>
+      </div>
+      <button class="btn" id="next-btn">NEXT LEVEL</button>
+    </div>
+
+    <div class="screen" id="over-screen">
+      <div style="font-size: 42px; margin-bottom: 8px;">💥🥀</div>
+      <h1 class="title-over" id="over-title">GAME OVER</h1>
+      <p id="over-reason">Sari knives khatam ho gayi aur fruits bach gaye!</p>
+      <div class="stat-badge">
+        <div class="stat-row"><span>Final Score</span><span id="over-score">0</span></div>
+        <div class="stat-row"><span>Stage Reached</span><span id="over-stage">1</span></div>
+        <div class="stat-row"><span>Best Score</span><span id="over-best">0</span></div>
+      </div>
+      <button class="btn" id="restart-btn">TRY AGAIN</button>
+    </div>
+  </div>
+
+  <script>
+  class SoundController {
+    constructor() {
+      this.ctx = null;
+      this.enabled = true;
+    }
+    init() {
+      if (!this.ctx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        this.ctx = new AudioContext();
+      }
+      if (this.ctx && this.ctx.state === 'suspended') {
+        this.ctx.resume();
+      }
+    }
+    playThrow() {
+      if (!this.enabled || !this.ctx) return;
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(540, now);
+      osc.frequency.exponentialRampToValueAtTime(140, now + 0.14);
+      gain.gain.setValueAtTime(0.35, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.15);
+    }
+    playSlice() {
+      if (!this.enabled || !this.ctx) return;
+      const now = this.ctx.currentTime;
+      const bufferSize = Math.floor(this.ctx.sampleRate * 0.16);
+      const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.22));
+      }
+      const noise = this.ctx.createBufferSource();
+      noise.buffer = buffer;
+      const filter = this.ctx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.setValueAtTime(1600, now);
+      filter.Q.setValueAtTime(3.0, now);
+
+      const gain = this.ctx.createGain();
+      gain.gain.setValueAtTime(0.65, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(this.ctx.destination);
+      noise.start(now);
+
+      const osc = this.ctx.createOscillator();
+      const oGain = this.ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(320, now);
+      osc.frequency.exponentialRampToValueAtTime(90, now + 0.12);
+      oGain.gain.setValueAtTime(0.35, now);
+      oGain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+      osc.connect(oGain);
+      oGain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.13);
+    }
+    playWin() {
+      if (!this.enabled || !this.ctx) return;
+      [440, 554, 659, 880].forEach((freq, idx) => {
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        const t = this.ctx.currentTime + idx * 0.08;
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, t);
+        gain.gain.setValueAtTime(0.22, t);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(t);
+        osc.stop(t + 0.26);
+      });
+    }
+    playFail() {
+      if (!this.enabled || !this.ctx) return;
+      const now = this.ctx.currentTime;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(200, now);
+      osc.frequency.linearRampToValueAtTime(75, now + 0.35);
+      gain.gain.setValueAtTime(0.35, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.36);
+    }
+  }
+
+  const FRUIT_SPECS = [
+    { id: 'banana', name: 'Banana', radius: 22, juiceColor: '#facc15' },
+    { id: 'apple', name: 'Apple', radius: 19, juiceColor: '#dc2626' },
+    { id: 'orange', name: 'Orange', radius: 19, juiceColor: '#ea580c' },
+    { id: 'papaya', name: 'Papaya', radius: 21, juiceColor: '#f97316' },
+    { id: 'pineapple', name: 'Pineapple', radius: 22, juiceColor: '#eab308' },
+    { id: 'pear', name: 'Pear', radius: 19, juiceColor: '#84cc16' }
+  ];
+
+  /* Realistic Banana Drawing */
+  function drawRealisticBanana(ctx, r) {
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.45)';
+    ctx.shadowBlur = 8;
+    ctx.shadowOffsetY = 3;
+
+    // Poora mota aur natural curve wala kela shape
+    ctx.beginPath();
+    ctx.moveTo(-r * 1.05, -r * 0.4);
+    ctx.bezierCurveTo(-r * 0.5, r * 1.0, r * 0.5, r * 0.95, r * 1.1, -r * 0.35);
+    ctx.bezierCurveTo(r * 0.5, r * 0.45, -r * 0.4, r * 0.5, -r * 1.05, -r * 0.4);
+    ctx.closePath();
+
+    const grad = ctx.createLinearGradient(-r * 0.8, -r * 0.2, r * 0.8, r * 0.8);
+    grad.addColorStop(0, '#facc15');
+    grad.addColorStop(0.3, '#fde047');
+    grad.addColorStop(0.7, '#eab308');
+    grad.addColorStop(1, '#ca8a04');
+    ctx.fillStyle = grad;
+    ctx.fill();
+    ctx.restore();
+
+    // Side ridge (3D banana peel facet line)
+    ctx.beginPath();
+    ctx.moveTo(-r * 0.95, -r * 0.35);
+    ctx.quadraticCurveTo(0, r * 0.72, r * 1.0, -r * 0.3);
+    ctx.strokeStyle = 'rgba(161, 98, 7, 0.45)';
+    ctx.lineWidth = 1.6;
+    ctx.stroke();
+
+    // Natural sheen / highlight
+    ctx.beginPath();
+    ctx.moveTo(-r * 0.85, -r * 0.3);
+    ctx.quadraticCurveTo(0, r * 0.55, r * 0.85, -r * 0.25);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+    ctx.lineWidth = 2.2;
+    ctx.stroke();
+
+    // Green natural stem at top-left
+    ctx.beginPath();
+    ctx.moveTo(-r * 1.05, -r * 0.4);
+    ctx.lineTo(-r * 1.25, -r * 0.55);
+    ctx.lineTo(-r * 1.18, -r * 0.65);
+    ctx.lineTo(-r * 0.98, -r * 0.48);
+    ctx.closePath();
+    ctx.fillStyle = '#4d7c0f';
+    ctx.fill();
+
+    // Dark brown/black blunt tip at bottom-right
+    ctx.beginPath();
+    ctx.arc(r * 1.12, -r * 0.32, 2.5, 0, Math.PI * 2);
+    ctx.fillStyle = '#451a03';
+    ctx.fill();
+  }
+
+  function drawRealisticApple(ctx, r) {
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.45)';
+    ctx.shadowBlur = 8;
+    ctx.shadowOffsetY = 3;
+
+    const grad = ctx.createRadialGradient(-r * 0.35, -r * 0.35, 2, 0, 0, r * 1.05);
+    grad.addColorStop(0, '#f87171');
+    grad.addColorStop(0.3, '#dc2626');
+    grad.addColorStop(0.7, '#b91c1c');
+    grad.addColorStop(1, '#7f1d1d');
+
+    ctx.beginPath();
+    ctx.moveTo(0, -r * 0.5);
+    ctx.bezierCurveTo(r * 0.7, -r * 1.05, r * 1.15, -r * 0.2, r * 0.95, r * 0.6);
+    ctx.bezierCurveTo(r * 0.75, r * 1.1, r * 0.2, r * 1.05, 0, r * 0.85);
+    ctx.bezierCurveTo(-r * 0.2, r * 1.05, -r * 0.75, r * 1.1, -r * 0.95, r * 0.6);
+    ctx.bezierCurveTo(-r * 1.15, -r * 0.2, -r * 0.7, -r * 1.05, 0, -r * 0.5);
+    ctx.fillStyle = grad;
+    ctx.fill();
+    ctx.restore();
+
+    ctx.fillStyle = 'rgba(254, 240, 138, 0.4)';
+    for (let i = 0; i < 7; i++) {
+      const a = (i * 0.9);
+      const dist = r * 0.55;
+      ctx.beginPath();
+      ctx.arc(Math.cos(a) * dist, Math.sin(a) * dist, 0.7, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    ctx.beginPath();
+    ctx.ellipse(-r * 0.38, -r * 0.35, r * 0.35, r * 0.18, -Math.PI / 4, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(0, -r * 0.5);
+    ctx.quadraticCurveTo(r * 0.2, -r * 1.1, r * 0.35, -r * 1.25);
+    ctx.strokeStyle = '#5c2b0c';
+    ctx.lineWidth = 2.4;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+
+    ctx.save();
+    ctx.translate(r * 0.15, -r * 0.95);
+    ctx.rotate(0.5);
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.quadraticCurveTo(r * 0.5, -r * 0.35, r * 0.7, 0);
+    ctx.quadraticCurveTo(r * 0.35, r * 0.25, 0, 0);
+    ctx.fillStyle = '#22c55e';
+    ctx.fill();
+    ctx.strokeStyle = '#15803d';
+    ctx.lineWidth = 0.8;
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawRealisticOrange(ctx, r) {
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.4)';
+    ctx.shadowBlur = 8;
+    ctx.shadowOffsetY = 3;
+
+    const grad = ctx.createRadialGradient(-r * 0.3, -r * 0.3, 3, 0, 0, r);
+    grad.addColorStop(0, '#fbbf24');
+    grad.addColorStop(0.35, '#f97316');
+    grad.addColorStop(0.8, '#ea580c');
+    grad.addColorStop(1, '#c2410c');
+
+    ctx.beginPath();
+    ctx.arc(0, 0, r, 0, Math.PI * 2);
+    ctx.fillStyle = grad;
+    ctx.fill();
+    ctx.restore();
+
+    ctx.fillStyle = 'rgba(194, 65, 12, 0.45)';
+    for (let i = 0; i < 18; i++) {
+      const a = (i * 1.35);
+      const dist = (i % 3 === 0) ? r * 0.4 : r * 0.75;
+      ctx.fillRect(Math.cos(a) * dist, Math.sin(a) * dist, 1.2, 1.2);
+    }
+
+    ctx.beginPath();
+    ctx.arc(-r * 0.3, -r * 0.3, r * 0.45, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+    ctx.fill();
+
+    ctx.fillStyle = '#15803d';
+    ctx.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a = (i * Math.PI * 2) / 5;
+      const x1 = Math.cos(a) * 4;
+      const y1 = -r * 0.85 + Math.sin(a) * 4;
+      if (i === 0) ctx.moveTo(x1, y1);
+      else ctx.lineTo(x1, y1);
+    }
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  function drawRealisticPapaya(ctx, r) {
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.4)';
+    ctx.shadowBlur = 8;
+    ctx.shadowOffsetY = 3;
+
+    ctx.beginPath();
+    ctx.moveTo(0, -r * 1.1);
+    ctx.bezierCurveTo(r * 0.6, -r * 1.0, r * 0.95, -r * 0.1, r * 0.9, r * 0.6);
+    ctx.bezierCurveTo(r * 0.75, r * 1.15, -r * 0.75, r * 1.15, -r * 0.9, r * 0.6);
+    ctx.bezierCurveTo(-r * 0.95, -r * 0.1, -r * 0.6, -r * 1.0, 0, -r * 1.1);
+
+    const grad = ctx.createRadialGradient(-r * 0.25, 0, 3, 0, 0, r * 1.1);
+    grad.addColorStop(0, '#fdba74');
+    grad.addColorStop(0.4, '#fb923c');
+    grad.addColorStop(0.75, '#ea580c');
+    grad.addColorStop(0.92, '#65a30d');
+    grad.addColorStop(1, '#4d7c0f');
+    ctx.fillStyle = grad;
+    ctx.fill();
+    ctx.restore();
+
+    ctx.beginPath();
+    ctx.ellipse(-r * 0.35, -r * 0.2, r * 0.2, r * 0.45, 0.2, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+    ctx.fill();
+
+    ctx.fillStyle = '#3f6212';
+    ctx.fillRect(-2, -r * 1.2, 4, 4);
+  }
+
+  function drawRealisticPineapple(ctx, r) {
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.45)';
+    ctx.shadowBlur = 8;
+    ctx.shadowOffsetY = 3;
+
+    ctx.beginPath();
+    ctx.ellipse(0, r * 0.2, r * 0.8, r * 0.95, 0, 0, Math.PI * 2);
+    const grad = ctx.createRadialGradient(0, r * 0.1, 4, 0, r * 0.2, r);
+    grad.addColorStop(0, '#fde047');
+    grad.addColorStop(0.45, '#eab308');
+    grad.addColorStop(0.8, '#b45309');
+    grad.addColorStop(1, '#78350f');
+    ctx.fillStyle = grad;
+    ctx.fill();
+    ctx.restore();
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.ellipse(0, r * 0.2, r * 0.8, r * 0.95, 0, 0, Math.PI * 2);
+    ctx.clip();
+    ctx.strokeStyle = '#451a03';
+    ctx.lineWidth = 1.2;
+    for (let x = -r * 1.5; x <= r * 1.5; x += 7) {
+      ctx.beginPath();
+      ctx.moveTo(x, -r);
+      ctx.lineTo(x + r, r * 1.5);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x, r * 1.5);
+      ctx.lineTo(x + r, -r);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    ctx.fillStyle = '#15803d';
+    for (let i = -3; i <= 3; i++) {
+      ctx.beginPath();
+      ctx.moveTo(i * 3.2, -r * 0.65);
+      ctx.lineTo(i * 5.5, -r * 1.35 - Math.abs(i) * 1.5);
+      ctx.lineTo(i * 3.2 + 3, -r * 0.65);
+      ctx.fill();
+    }
+  }
+
+  function drawRealisticPear(ctx, r) {
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.38)';
+    ctx.shadowBlur = 8;
+    ctx.shadowOffsetY = 3;
+
+    ctx.beginPath();
+    ctx.moveTo(0, -r * 1.05);
+    ctx.bezierCurveTo(r * 0.45, -r * 0.9, r * 0.45, -r * 0.3, r * 0.85, r * 0.3);
+    ctx.bezierCurveTo(r * 1.05, r * 0.8, r * 0.6, r * 1.15, 0, r * 1.1);
+    ctx.bezierCurveTo(-r * 0.6, r * 1.15, -r * 1.05, r * 0.8, -r * 0.85, r * 0.3);
+    ctx.bezierCurveTo(-r * 0.45, -r * 0.3, -r * 0.45, -r * 0.9, 0, -r * 1.05);
+
+    const grad = ctx.createRadialGradient(-r * 0.25, -r * 0.1, 3, 0, 0, r * 1.15);
+    grad.addColorStop(0, '#fef08a');
+    grad.addColorStop(0.35, '#d9f99d');
+    grad.addColorStop(0.75, '#84cc16');
+    grad.addColorStop(1, '#4d7c0f');
+    ctx.fillStyle = grad;
+    ctx.fill();
+    ctx.restore();
+
+    ctx.fillStyle = 'rgba(101, 163, 13, 0.4)';
+    for (let i = 0; i < 9; i++) {
+      const a = i * 0.8;
+      ctx.fillRect(Math.cos(a) * r * 0.5, Math.sin(a) * r * 0.5, 1, 1);
+    }
+
+    ctx.beginPath();
+    ctx.moveTo(0, -r * 1.05);
+    ctx.quadraticCurveTo(3, -r * 1.3, 6, -r * 1.4);
+    ctx.strokeStyle = '#78350f';
+    ctx.lineWidth = 2.2;
+    ctx.stroke();
+  }
+
+  function renderFruitByType(ctx, typeId, radius) {
+    switch (typeId) {
+      case 'banana':    drawRealisticBanana(ctx, radius); break;
+      case 'apple':     drawRealisticApple(ctx, radius); break;
+      case 'orange':    drawRealisticOrange(ctx, radius); break;
+      case 'papaya':    drawRealisticPapaya(ctx, radius); break;
+      case 'pineapple': drawRealisticPineapple(ctx, radius); break;
+      case 'pear':      drawRealisticPear(ctx, radius); break;
+      default:          drawRealisticBanana(ctx, radius); break;
+    }
+  }
+
+  function drawRealisticCutHalf(ctx, slice) {
+    ctx.save();
+    ctx.translate(slice.x, slice.y);
+    ctx.rotate(slice.rot);
+    ctx.globalAlpha = Math.max(0, slice.life);
+
+    const r = slice.radius;
+    const isLeft = slice.dir < 0;
+
+    ctx.beginPath();
+    if (isLeft) {
+      ctx.arc(0, 0, r, -Math.PI / 2, Math.PI / 2, true);
+    } else {
+      ctx.arc(0, 0, r, -Math.PI / 2, Math.PI / 2, false);
+    }
+    ctx.closePath();
+
+    ctx.fillStyle = slice.skinColor;
+    ctx.fill();
+
+    ctx.beginPath();
+    if (isLeft) {
+      ctx.arc(0, 0, r * 0.82, -Math.PI / 2, Math.PI / 2, true);
+    } else {
+      ctx.arc(0, 0, r * 0.82, -Math.PI / 2, Math.PI / 2, false);
+    }
+    ctx.closePath();
+    ctx.fillStyle = slice.innerColor;
+    ctx.fill();
+
+    const seedX = isLeft ? -r * 0.35 : r * 0.35;
+    ctx.fillStyle = slice.seedColor;
+    ctx.beginPath();
+    ctx.ellipse(seedX, -2, 2.4, 4, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(seedX, 5, 2.2, 3.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.restore();
+  }
+
+  function drawDagger(ctx, x, y, angle = 0, length = 76, width = 16) {
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(angle);
+
+    const halfW = width / 2;
+    const bladeH = length * 0.65;
+    const handleH = length * 0.35;
+
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.5)';
+    ctx.shadowBlur = 9;
+    ctx.shadowOffsetY = 4;
+
+    const bladeGrad = ctx.createLinearGradient(-halfW, 0, halfW, 0);
+    bladeGrad.addColorStop(0, '#cbd5e1');
+    bladeGrad.addColorStop(0.35, '#ffffff');
+    bladeGrad.addColorStop(0.55, '#f1f5f9');
+    bladeGrad.addColorStop(0.75, '#94a3b8');
+    bladeGrad.addColorStop(1, '#64748b');
+
+    ctx.beginPath();
+    ctx.moveTo(0, -bladeH);
+    ctx.lineTo(halfW * 0.9, -bladeH * 0.4);
+    ctx.lineTo(halfW * 0.8, 0);
+    ctx.lineTo(-halfW * 0.8, 0);
+    ctx.lineTo(-halfW * 0.9, -bladeH * 0.4);
+    ctx.closePath();
+    ctx.fillStyle = bladeGrad;
+    ctx.fill();
+    ctx.restore();
+
+    ctx.beginPath();
+    ctx.moveTo(0, -bladeH * 0.9);
+    ctx.lineTo(0, 0);
+    ctx.strokeStyle = 'rgba(30, 41, 59, 0.65)';
+    ctx.lineWidth = 1.4;
+    ctx.stroke();
+
+    const guardW = width * 1.5;
+    ctx.fillStyle = '#e2e8f0';
+    ctx.fillRect(-guardW / 2, 0, guardW, 5.5);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(-guardW / 2, 0, guardW, 1.8);
+
+    const handleW = width * 0.7;
+    const handleGrad = ctx.createLinearGradient(-handleW / 2, 0, handleW / 2, 0);
+    handleGrad.addColorStop(0, '#f97316');
+    handleGrad.addColorStop(0.35, '#fdba74');
+    handleGrad.addColorStop(0.7, '#ea580c');
+    handleGrad.addColorStop(1, '#c2410c');
+
+    ctx.fillStyle = handleGrad;
+    ctx.fillRect(-handleW / 2, 5.5, handleW, handleH);
+
+    ctx.strokeStyle = '#9a3412';
+    ctx.lineWidth = 1.4;
+    for (let h = 9; h < 5.5 + handleH - 4; h += 4.5) {
+      ctx.beginPath();
+      ctx.moveTo(-handleW / 2, h);
+      ctx.lineTo(handleW / 2, h);
+      ctx.stroke();
+    }
+
+    ctx.fillStyle = '#e2e8f0';
+    ctx.fillRect(-handleW * 0.6, 5.5 + handleH, handleW * 1.2, 5);
+
+    ctx.restore();
+  }
+
+  class GameEngine {
+    constructor() {
+      this.canvas = document.getElementById('canvas');
+      this.ctx = this.canvas.getContext('2d');
+      this.container = document.getElementById('game-container');
+      this.audio = new SoundController();
+
+      this.scoreEl = document.getElementById('score-val');
+      this.stageEl = document.getElementById('stage-val');
+      this.diffEl = document.getElementById('diff-label');
+      this.bestEl = document.getElementById('best-val');
+
+      this.startScreen = document.getElementById('start-screen');
+      this.winScreen = document.getElementById('win-screen');
+      this.overScreen = document.getElementById('over-screen');
+
+      this.stage = 1;
+      this.score = 0;
+      this.bestScore = parseInt(localStorage.getItem('realistic_fruit_best') || '0', 10);
+      this.bestEl.innerText = this.bestScore;
+      document.getElementById('start-best').innerText = this.bestScore;
+
+      this.orbit = {
+        x: 0,
+        y: 0,
+        radius: 80,
+        angle: 0,
+        speed: 0.026,
+        direction: 1,
+        oscillation: false,
+        timer: 0
+      };
+
+      this.fruits = [];
+      this.flyingKnife = null;
+      this.knifeReady = true;
+      this.knivesLeft = 0;
+      this.totalStageKnives = 0;
+
+      this.slices = [];
+      this.particles = [];
+      this.popups = [];
+
+      this.gameState = 'START';
+      this.lastTime = 0;
+
+      this.resize();
+      window.addEventListener('resize', () => this.resize());
+      this.bindEvents();
+      requestAnimationFrame((t) => this.loop(t));
+    }
+
+    resize() {
+      const rect = this.container.getBoundingClientRect();
+      this.width = rect.width;
+      this.height = rect.height;
+      this.dpr = window.devicePixelRatio || 1;
+
+      this.canvas.width = this.width * this.dpr;
+      this.canvas.height = this.height * this.dpr;
+      this.ctx.resetTransform();
+      this.ctx.scale(this.dpr, this.dpr);
+
+      this.orbit.x = this.width / 2;
+      this.orbit.y = this.height * 0.35;
+      this.orbit.radius = Math.min(this.width * 0.22, 82);
+    }
+
+    bindEvents() {
+      const throwAction = (e) => {
+        if (this.gameState !== 'PLAYING') return;
+        if (e.target.closest('#sound-toggle') || e.target.closest('.hud')) return;
+        this.throwKnife();
+      };
+
+      this.container.addEventListener('pointerdown', throwAction);
+
+      document.getElementById('start-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.audio.init();
+        this.startScreen.classList.remove('active');
+        this.stage = 1;
+        this.score = 0;
+        this.updateHUD();
+        this.startLevel();
+      });
+
+      document.getElementById('next-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.audio.init();
+        this.winScreen.classList.remove('active');
+        this.stage++;
+        this.startLevel();
+      });
+
+      document.getElementById('restart-btn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.audio.init();
+        this.overScreen.classList.remove('active');
+        this.stage = 1;
+        this.score = 0;
+        this.updateHUD();
+        this.startLevel();
+      });
+
+      const sBtn = document.getElementById('sound-toggle');
+      sBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.audio.init();
+        this.audio.enabled = !this.audio.enabled;
+        sBtn.innerText = this.audio.enabled ? '🔊' : '🔇';
+      });
+    }
+
+    startLevel() {
+      this.gameState = 'PLAYING';
+      this.slices = [];
+      this.particles = [];
+      this.popups = [];
+      this.flyingKnife = null;
+      this.knifeReady = true;
+
+      const baseSpeed = 0.024 + Math.min(this.stage * 0.0035, 0.052);
+      this.orbit.direction = (this.stage % 2 === 0) ? -1 : 1;
+      this.orbit.speed = baseSpeed;
+      this.orbit.oscillation = (this.stage >= 3);
+      this.orbit.timer = 0;
+
+      if (this.stage <= 2) this.diffEl.innerText = "EASY";
+      else if (this.stage <= 5) this.diffEl.innerText = "MEDIUM";
+      else if (this.stage <= 8) this.diffEl.innerText = "HARD";
+      else this.diffEl.innerText = "EXPERT";
+
+      const count = Math.floor(Math.random() * (8 - 3 + 1)) + 3;
+      const extraKnives = (this.stage <= 3) ? 2 : 1;
+      this.knivesLeft = count + extraKnives;
+      this.totalStageKnives = this.knivesLeft;
+
+      this.fruits = [];
+      const step = (Math.PI * 2) / count;
+      const startAngle = Math.random() * Math.PI * 2;
+
+      for (let i = 0; i < count; i++) {
+        const spec = FRUIT_SPECS[Math.floor(Math.random() * FRUIT_SPECS.length)];
+        this.fruits.push({
+          spec: spec,
+          angle: startAngle + i * step + (Math.random() - 0.5) * 0.12,
+          radius: spec.radius,
+          alive: true
+        });
+      }
+
+      this.updateHUD();
+    }
+
+    updateHUD() {
+      this.scoreEl.innerText = this.score;
+      this.stageEl.innerText = `STAGE ${this.stage}`;
+      if (this.score > this.bestScore) {
+        this.bestScore = this.score;
+        localStorage.setItem('realistic_fruit_best', this.bestScore);
+      }
+      this.bestEl.innerText = this.bestScore;
+    }
+
+    throwKnife() {
+      if (!this.knifeReady || this.flyingKnife || this.knivesLeft <= 0) return;
+
+      this.audio.playThrow();
+      this.knivesLeft--;
+      this.knifeReady = false;
+
+      this.flyingKnife = {
+        x: this.orbit.x,
+        y: this.height - 110,
+        vy: -34,
+        bladeTipY: this.height - 110 - 50,
+        slicedCount: 0
+      };
+    }
+
+    checkKnifeContinuousCutting() {
+      if (!this.flyingKnife) return;
+
+      const kx = this.flyingKnife.x;
+      const ky = this.flyingKnife.y - 40;
+
+      for (let i = 0; i < this.fruits.length; i++) {
+        const f = this.fruits[i];
+        if (!f.alive) continue;
+
+        const totalAngle = this.orbit.angle + f.angle;
+        const fx = this.orbit.x + Math.cos(totalAngle) * this.orbit.radius;
+        const fy = this.orbit.y + Math.sin(totalAngle) * this.orbit.radius;
+
+        const dist = Math.hypot(kx - fx, ky - fy);
+        if (dist <= f.radius + 14) {
+          f.alive = false;
+          this.flyingKnife.slicedCount++;
+          this.audio.playSlice();
+
+          this.score += 1;
+          this.updateHUD();
+
+          this.spawnRealisticSlices(fx, fy, f.spec, totalAngle);
+          this.spawnJuiceSplatter(fx, fy, f.spec.juiceColor);
+
+          const bonusText = this.flyingKnife.slicedCount > 1 ? `COMBO x${this.flyingKnife.slicedCount}!` : '+1';
+          this.popups.push({
+            x: fx,
+            y: fy - 15,
+            text: bonusText,
+            color: this.flyingKnife.slicedCount > 1 ? '#ff4757' : '#ffd32a',
+            alpha: 1.0
+          });
+        }
+      }
+
+      if (this.flyingKnife.y < -80) {
+        this.flyingKnife = null;
+        this.knifeReady = true;
+
+        const remaining = this.fruits.filter(f => f.alive).length;
+        if (remaining === 0) {
+          this.levelWon();
+        } else if (this.knivesLeft === 0) {
+          this.gameOver("Aapki saari knives khatam ho gayi aur fruits bach gaye!");
+        }
+      }
+    }
+
+    spawnRealisticSlices(x, y, spec, angle) {
+      let skinColor = '#eab308';
+      let innerColor = '#fef9c3';
+      let seedColor = '#713f12';
+
+      if (spec.id === 'apple') {
+        skinColor = '#dc2626'; innerColor = '#fef08a'; seedColor = '#451a03';
+      } else if (spec.id === 'orange') {
+        skinColor = '#ea580c'; innerColor = '#fed7aa'; seedColor = '#fff7ed';
+      } else if (spec.id === 'papaya') {
+        skinColor = '#f97316'; innerColor = '#ffedd5'; seedColor = '#1e1b4b';
+      } else if (spec.id === 'pineapple') {
+        skinColor = '#ca8a04'; innerColor = '#fef08a'; seedColor = '#78350f';
+      } else if (spec.id === 'pear') {
+        skinColor = '#65a30d'; innerColor = '#f7fee7'; seedColor = '#3f2c00';
+      }
+
+      [-1, 1].forEach((dir) => {
+        this.slices.push({
+          x: x,
+          y: y,
+          vx: dir * (3.4 + Math.random() * 2.8),
+          vy: -4.5 - Math.random() * 2.5,
+          rot: angle,
+          vRot: dir * 0.16,
+          dir: dir,
+          radius: spec.radius,
+          skinColor: skinColor,
+          innerColor: innerColor,
+          seedColor: seedColor,
+          life: 1.0
+        });
+      });
+    }
+
+    spawnJuiceSplatter(x, y, color) {
+      for (let i = 0; i < 16; i++) {
+        const ang = Math.random() * Math.PI * 2;
+        const spd = 2.5 + Math.random() * 6.5;
+        this.particles.push({
+          x: x,
+          y: y,
+          vx: Math.cos(ang) * spd,
+          vy: Math.sin(ang) * spd,
+          radius: 2.5 + Math.random() * 3.5,
+          color: color,
+          alpha: 1.0
+        });
+      }
+    }
+
+    levelWon() {
+      this.gameState = 'WON';
+      this.audio.playWin();
+      document.getElementById('win-fruits').innerText = `+${this.fruits.length}`;
+      document.getElementById('win-score').innerText = this.score;
+      document.getElementById('win-msg').innerText = `Stage ${this.stage} Clear! Speed aur difficulty aur tez hogi.`;
+      setTimeout(() => {
+        this.winScreen.classList.add('active');
+      }, 450);
+    }
+
+    gameOver(reason) {
+      this.gameState = 'GAMEOVER';
+      this.audio.playFail();
+      document.getElementById('over-reason').innerText = reason;
+      document.getElementById('over-score').innerText = this.score;
+      document.getElementById('over-stage').innerText = this.stage;
+      document.getElementById('over-best').innerText = this.bestScore;
+      setTimeout(() => {
+        this.overScreen.classList.add('active');
+      }, 450);
+    }
+
+    update(dt) {
+      if (this.gameState === 'PLAYING') {
+        this.orbit.timer += dt;
+
+        let curSpeed = this.orbit.speed;
+        if (this.orbit.oscillation) {
+          curSpeed += Math.sin(this.orbit.timer * 2.5) * 0.018;
+        }
+        if (this.stage >= 6 && Math.sin(this.orbit.timer * 0.8) < -0.65) {
+          curSpeed = -curSpeed * 0.85;
+        }
+
+        this.orbit.angle += curSpeed * this.orbit.direction;
+
+        if (this.flyingKnife) {
+          this.flyingKnife.y += this.flyingKnife.vy;
+          this.checkKnifeContinuousCutting();
+        }
+      }
+
+      for (let i = this.slices.length - 1; i >= 0; i--) {
+        const s = this.slices[i];
+        s.x += s.vx;
+        s.y += s.vy;
+        s.vy += 0.48;
+        s.rot += s.vRot;
+        s.life -= 0.016;
+        if (s.life <= 0 || s.y > this.height + 60) {
+          this.slices.splice(i, 1);
+        }
+      }
+
+      for (let i = this.particles.length - 1; i >= 0; i--) {
+        const p = this.particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.22;
+        p.alpha -= 0.026;
+        if (p.alpha <= 0) {
+          this.particles.splice(i, 1);
+        }
+      }
+
+      for (let i = this.popups.length - 1; i >= 0; i--) {
+        const pop = this.popups[i];
+        pop.y -= 1.4;
+        pop.alpha -= 0.024;
+        if (pop.alpha <= 0) {
+          this.popups.splice(i, 1);
+        }
+      }
+    }
+
+    render() {
+      this.ctx.clearRect(0, 0, this.width, this.height);
+
+      this.ctx.save();
+      this.ctx.beginPath();
+      this.ctx.arc(this.orbit.x, this.orbit.y, this.orbit.radius, 0, Math.PI * 2);
+      this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+      this.ctx.lineWidth = 2.5;
+      this.ctx.setLineDash([6, 8]);
+      this.ctx.stroke();
+
+      this.ctx.beginPath();
+      this.ctx.arc(this.orbit.x, this.orbit.y, 4, 0, Math.PI * 2);
+      this.ctx.fillStyle = 'rgba(255, 211, 42, 0.4)';
+      this.ctx.fill();
+      this.ctx.restore();
+
+      this.fruits.forEach(f => {
+        if (!f.alive) return;
+        const totalAngle = this.orbit.angle + f.angle;
+        const fx = this.orbit.x + Math.cos(totalAngle) * this.orbit.radius;
+        const fy = this.orbit.y + Math.sin(totalAngle) * this.orbit.radius;
+
+        this.ctx.save();
+        this.ctx.translate(fx, fy);
+        this.ctx.rotate(totalAngle + Math.PI / 2);
+        renderFruitByType(this.ctx, f.spec.id, f.radius);
+        this.ctx.restore();
+      });
+
+      this.slices.forEach(s => drawRealisticCutHalf(this.ctx, s));
+
+      this.particles.forEach(p => {
+        this.ctx.save();
+        this.ctx.globalAlpha = p.alpha;
+        this.ctx.fillStyle = p.color;
+        this.ctx.beginPath();
+        this.ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        this.ctx.fill();
+        this.ctx.restore();
+      });
+
+      if (this.flyingKnife) {
+        drawDagger(this.ctx, this.flyingKnife.x, this.flyingKnife.y, 0, 76, 16);
+      } else if (this.knifeReady && this.knivesLeft > 0 && this.gameState === 'PLAYING') {
+        drawDagger(this.ctx, this.orbit.x, this.height - 110, 0, 76, 16);
+      }
+
+      this.drawLeftKnifeStack();
+
+      this.popups.forEach(pop => {
+        this.ctx.save();
+        this.ctx.globalAlpha = pop.alpha;
+        this.ctx.fillStyle = pop.color;
+        this.ctx.font = '900 24px -apple-system, sans-serif';
+        this.ctx.textAlign = 'center';
+        this.ctx.shadowColor = 'rgba(0,0,0,0.85)';
+        this.ctx.shadowBlur = 8;
+        this.ctx.fillText(pop.text, pop.x, pop.y);
+        this.ctx.restore();
+      });
+    }
+
+    drawLeftKnifeStack() {
+      const total = this.totalStageKnives;
+      const left = this.knivesLeft;
+      const startX = 24;
+      const bottomY = this.height - 65;
+      const spacing = 19;
+
+      for (let i = 0; i < total; i++) {
+        const y = bottomY - i * spacing;
+        const isAvailable = i < left;
+
+        this.ctx.save();
+        this.ctx.translate(startX, y);
+        this.ctx.rotate(0.35);
+
+        this.ctx.fillStyle = isAvailable ? '#ffffff' : 'rgba(255, 255, 255, 0.15)';
+        this.ctx.beginPath();
+        this.ctx.moveTo(0, -10);
+        this.ctx.lineTo(3.2, 0);
+        this.ctx.lineTo(-3.2, 0);
+        this.ctx.closePath();
+        this.ctx.fill();
+
+        this.ctx.fillStyle = isAvailable ? '#f97316' : 'rgba(255, 255, 255, 0.08)';
+        this.ctx.fillRect(-2, 0, 4, 7);
+
+        this.ctx.restore();
+      }
+    }
+
+    loop(timestamp) {
+      const dt = Math.min((timestamp - this.lastTime) / 1000, 0.033);
+      this.lastTime = timestamp;
+
+      this.update(dt);
+      this.render();
+
+      requestAnimationFrame((t) => this.loop(t));
+    }
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    new GameEngine();
+  });
+  </script>
+</body>
+</html>
