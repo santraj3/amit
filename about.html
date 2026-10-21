@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - Amit Academy Games</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#090d16',
+                        cardBg: '#111827',
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #090d16;
+            background-image: 
+                radial-gradient(at 10% 10%, hsla(250, 70%, 15%, 0.5) 0px, transparent 50%),
+                radial-gradient(at 90% 10%, hsla(210, 80%, 15%, 0.4) 0px, transparent 50%),
+                radial-gradient(at 50% 80%, hsla(280, 60%, 12%, 0.4) 0px, transparent 50%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            color: #f1f5f9;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #090d16;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen justify-between">
+
+    <!-- Header Navigation -->
+    <header class="w-full max-w-5xl mx-auto px-4 pt-6 pb-4 flex items-center justify-between gap-4">
+        <a href="https://amitacademy.in" class="flex items-center gap-3 group text-decoration-none">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-500 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-500/30 group-hover:scale-105 transition">
+                <i class="fa-solid fa-gamepad text-white text-lg"></i>
+            </div>
+            <div>
+                <span class="text-xs tracking-widest uppercase text-purple-400 font-bold block">Amit Academy</span>
+                <span class="text-xl font-extrabold text-white tracking-wide">Mini Games</span>
+            </div>
+        </a>
+
+        <a href="https://amitacademy.in" class="px-4 py-2 rounded-full bg-slate-900/80 border border-slate-700/80 text-slate-300 text-sm font-medium hover:text-white hover:border-purple-500 transition backdrop-blur-md">
+            <i class="fa-solid fa-house mr-1.5"></i> Home
+        </a>
+    </header>
+
+    <!-- Main About Content -->
+    <main class="w-full max-w-4xl mx-auto px-4 flex-grow py-8">
+        
+        <div class="text-center mb-10">
+            <h1 class="text-4xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-300 to-purple-400 mb-4 tracking-tight">
+                About Us
+            </h1>
+            <p class="text-slate-400 text-base sm:text-lg max-w-2xl mx-auto">
+                Welcome to Amit Academy Games — your ultimate free destination for instant browser entertainment.
+            </p>
+        </div>
+
+        <div class="bg-slate-900/80 border border-slate-800/80 rounded-3xl p-6 sm:p-10 backdrop-blur-md shadow-xl space-y-8 text-slate-300 text-sm sm:text-base leading-relaxed">
+            
+            <div>
+                <h2 class="text-xl font-bold text-white mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-bullseye text-purple-400"></i> Who We Are
+                </h2>
+                <p>
+                    <strong>Amit Academy</strong> (<a href="https://amitacademy.in" class="text-purple-400 hover:underline">amitacademy.in</a>) is a lightweight, responsive gaming portal designed for players of all ages. Our mission is to provide quick access to smooth, high-performing, and engaging HTML5 browser games without the hassle of heavy downloads or installation procedures.
+                </p>
+            </div>
+
+            <div>
+                <h2 class="text-xl font-bold text-white mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-gamepad text-blue-400"></i> What We Offer
+                </h2>
+                <p class="mb-3">
+                    We host a curated selection of popular arcade, action, puzzle, and classic retro games optimized for both desktop and mobile devices:
+                </p>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs sm:text-sm font-semibold">
+                    <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700/50 text-slate-200">🎯 Knife Hit</div>
+                    <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700/50 text-slate-200">⚔️ Fruit Cutter</div>
+                    <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700/50 text-slate-200">🔵 Bubble Shooter</div>
+                    <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700/50 text-slate-200">🧠 Math Puzzle</div>
+                    <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700/50 text-slate-200">🏃‍♂️ Runner Game</div>
+                    <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700/50 text-slate-200">🐍 Classic Snake</div>
+                </div>
+            </div>
+
+            <div>
+                <h2 class="text-xl font-bold text-white mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-heart text-pink-400"></i> Our Commitment
+                </h2>
+                <p>
+                    We strive to maintain a clean, safe, and family-friendly environment. All our games load instantly and run right inside your standard web browser, ensuring seamless gaming wherever you go.
+                </p>
+            </div>
+
+            <div class="border-t border-slate-800 pt-6">
+                <h2 class="text-xl font-bold text-white mb-3 flex items-center gap-2">
+                    <i class="fa-solid fa-envelope text-yellow-400"></i> Get In Touch
+                </h2>
+                <p class="mb-2">
+                    Have feedback, suggestions, or business inquiries? Feel free to reach out to us directly via email:
+                </p>
+                <a href="mailto:sk93364074@gmail.com" class="inline-flex items-center gap-2 text-purple-400 font-semibold hover:text-purple-300 transition">
+                    <i class="fa-solid fa-paper-plane"></i> sk93364074@gmail.com
+                </a>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer Section -->
+    <footer class="w-full bg-slate-950/80 border-t border-slate-900 pt-10 pb-8 mt-auto">
+        <div class="w-full max-w-5xl mx-auto px-4 flex flex-col items-center text-center">
+            
+            <a href="https://amitacademy.in" class="text-lg font-bold text-white mb-2 flex items-center gap-2">
+                <i class="fa-solid fa-gamepad text-purple-500"></i> Amit Academy
+            </a>
+            <p class="text-slate-400 text-xs sm:text-sm max-w-md mb-6">
+                Your ultimate destination for fast, fun and responsive browser-based mini-games.
+            </p>
+
+            <div class="flex flex-wrap justify-center gap-6 mb-8 text-slate-300 text-xs sm:text-sm font-medium">
+                <a href="https://amitacademy.in" class="hover:text-purple-400 transition">Home</a>
+                <a href="https://amitacademy.in/about.html" class="hover:text-purple-400 transition text-purple-400">About Us</a>
+                <a href="https://amitacademy.in/contact.html" class="hover:text-purple-400 transition">Contact Us</a>
+                <a href="https://amitacademy.in/privacy.html" class="hover:text-purple-400 transition">Privacy Policy</a>
+                <a href="https://amitacademy.in/terms.html" class="hover:text-purple-400 transition">Terms & Conditions</a>
+            </div>
+
+            <div class="w-full border-t border-slate-900 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
+                <p>&copy; 2026 Amit Academy. All rights reserved.</p>
+                <div class="flex items-center gap-4">
+                    <span class="inline-flex items-center gap-1.5 text-slate-400 font-medium">
+                        <i class="fa-solid fa-shield-halved text-emerald-400"></i> Secure & Safe
+                    </span>
+                </div>
+            </div>
+
+        </div>
+    </footer>
+
+</body>
+</html>
