@@ -82,7 +82,7 @@
       font-family: 'Teko', sans-serif;
       font-size: 2.2rem;
       line-height: 1;
-      padding: 3px 14px;
+      padding: 4px 14px;
       background: rgba(255, 170, 0, 0.15);
       border: 1px solid rgba(255, 170, 0, 0.45);
       color: #ffaa00;
@@ -218,6 +218,13 @@
       transform: scale(0.97);
       box-shadow: 0 4px 12px rgba(255, 8, 68, 0.3);
     }
+    .btn-primary:disabled {
+      background: #33394a;
+      color: #8890a6;
+      box-shadow: none;
+      cursor: not-allowed;
+      transform: none;
+    }
     .btn-secondary {
       width: 100%;
       padding: 13px;
@@ -235,6 +242,22 @@
     .btn-secondary:active {
       background: rgba(255, 255, 255, 0.18);
       transform: scale(0.98);
+    }
+    .btn-secondary:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .lock-banner {
+      background: rgba(255, 42, 95, 0.18);
+      border: 1px solid rgba(255, 42, 95, 0.55);
+      color: #ff809f;
+      font-size: 0.88rem;
+      font-weight: 700;
+      padding: 12px 14px;
+      border-radius: 14px;
+      margin-bottom: 14px;
+      line-height: 1.4;
+      display: none;
     }
     .powerup-pill {
       position: fixed;
@@ -273,6 +296,29 @@
       border-radius: 12px;
       border: 1px solid rgba(255, 255, 255, 0.08);
     }
+    /* Glowing Final Score Box */
+    .stat-box.glow-box {
+      background: rgba(0, 242, 254, 0.12);
+      border: 1.5px solid #00f2fe;
+      box-shadow: 0 0 20px rgba(0, 242, 254, 0.45), inset 0 0 12px rgba(0, 242, 254, 0.2);
+      animation: scoreBoxGlow 1.5s ease-in-out infinite alternate;
+    }
+    .stat-box.glow-box .title {
+      color: #80f9ff;
+    }
+    .stat-box.glow-box .val {
+      text-shadow: 0 0 14px rgba(0, 242, 254, 0.85);
+    }
+    @keyframes scoreBoxGlow {
+      from {
+        box-shadow: 0 0 14px rgba(0, 242, 254, 0.35), inset 0 0 8px rgba(0, 242, 254, 0.15);
+        border-color: rgba(0, 242, 254, 0.7);
+      }
+      to {
+        box-shadow: 0 0 28px rgba(0, 242, 254, 0.85), inset 0 0 18px rgba(0, 242, 254, 0.4);
+        border-color: #00f2fe;
+      }
+    }
     .stat-box .title {
       font-size: 0.7rem;
       color: #8b92ab;
@@ -310,7 +356,7 @@
     <!-- Top In-Game HUD -->
     <div id="hud">
       <div class="hud-interactive" id="hud-left">
-        <div id="timer-badge" class="timer-badge" style="display: none;">02:00</div>
+        <div id="timer-badge" class="timer-badge">00:00</div>
       </div>
       <div class="score-container">
         <span class="score-label">Score</span>
@@ -340,6 +386,10 @@
           <button type="button" class="mode-btn" data-mode="time">Time 2 Min</button>
         </div>
 
+        <div id="start-lock-msg" class="lock-banner">
+          Aaj ka game poora ho chuka hai. Ab aap kal dobara khel sakte hain!
+        </div>
+
         <button type="button" id="btn-play" class="btn-primary">PLAY NOW</button>
       </div>
     </div>
@@ -354,14 +404,14 @@
       </div>
     </div>
 
-    <!-- GAME OVER SCREEN (Screen par koi URL ya redirect text nahi hai) -->
+    <!-- GAME OVER SCREEN -->
     <div id="gameover-screen" class="screen-overlay">
       <div class="glass-card">
         <div id="gameover-high-badge" class="high-badge" style="display: none;">NEW HIGH SCORE!</div>
         <h2 style="font-family: 'Teko', sans-serif; font-size: 3.4rem; color: #ff2a5f; margin-bottom: 2px;">GAME OVER</h2>
 
         <div class="stats-grid">
-          <div class="stat-box">
+          <div class="stat-box glow-box" id="final-score-box">
             <div class="title">Final Score</div>
             <div class="val" id="stat-score" style="color: #00f2fe;">0</div>
           </div>
@@ -374,9 +424,13 @@
             <div class="val" id="stat-combo" style="color: #fffa65;">0x</div>
           </div>
           <div class="stat-box">
-            <div class="title">Sliced / Missed</div>
-            <div class="val" id="stat-slices">0 / 0</div>
+            <div class="title">Playing Time</div>
+            <div class="val" id="stat-time">00:00</div>
           </div>
+        </div>
+
+        <div id="gameover-lock-msg" class="lock-banner">
+          Aaj ka game poora ho chuka hai. Ab aap kal dobara khel sakte hain!
         </div>
 
         <button type="button" id="btn-restart" class="btn-primary">PLAY AGAIN</button>
@@ -396,15 +450,15 @@
     };
 
     const FRUIT_TYPES = [
-      { name: 'Apple', radius: 38, score: 10, juiceColor: '#e02828', pulpColor: '#fff5d7' },
-      { name: 'Watermelon', radius: 48, score: 15, juiceColor: '#ff2a4d', pulpColor: '#ff3344' },
-      { name: 'Orange', radius: 38, score: 10, juiceColor: '#ff9200', pulpColor: '#ff9e1f' },
-      { name: 'Banana', radius: 36, score: 10, juiceColor: '#ffe57f', pulpColor: '#fff8db' },
-      { name: 'Pineapple', radius: 44, score: 20, juiceColor: '#ffd54f', pulpColor: '#fdd835' },
-      { name: 'Strawberry', radius: 30, score: 15, juiceColor: '#e53935', pulpColor: '#ef5350' },
-      { name: 'Mango', radius: 40, score: 15, juiceColor: '#ffa726', pulpColor: '#ff9800' },
-      { name: 'Kiwi', radius: 32, score: 20, juiceColor: '#7cb342', pulpColor: '#8bc34a' },
-      { name: 'Coconut', radius: 42, score: 25, juiceColor: '#eeeeee', pulpColor: '#ffffff' }
+      { name: 'Banana', radius: 36, score: 200, juiceColor: '#ffe57f', pulpColor: '#fff8db' },
+      { name: 'Apple', radius: 38, score: 250, juiceColor: '#e02828', pulpColor: '#fff5d7' },
+      { name: 'Orange', radius: 38, score: 250, juiceColor: '#ff9200', pulpColor: '#ff9e1f' },
+      { name: 'Strawberry', radius: 30, score: 300, juiceColor: '#e53935', pulpColor: '#ef5350' },
+      { name: 'Kiwi', radius: 32, score: 350, juiceColor: '#7cb342', pulpColor: '#8bc34a' },
+      { name: 'Mango', radius: 40, score: 350, juiceColor: '#ffa726', pulpColor: '#ff9800' },
+      { name: 'Watermelon', radius: 48, score: 400, juiceColor: '#ff2a4d', pulpColor: '#ff3344' },
+      { name: 'Pineapple', radius: 44, score: 450, juiceColor: '#ffd54f', pulpColor: '#fdd835' },
+      { name: 'Coconut', radius: 42, score: 500, juiceColor: '#eeeeee', pulpColor: '#ffffff' }
     ];
 
     const POWERUP_TYPES = [
@@ -426,6 +480,48 @@
         } catch(e) {}
       }
     };
+
+    // Helper: Aaj ki local date string (YYYY-MM-DD) nikalne ke liye
+    function getTodayDateString() {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const d = String(now.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    // Check karega ki kya game aaj ke liye locked hai (agle din khulega)
+    function isLockedToday() {
+      const lockedDate = Storage.get('locked_date', null);
+      const today = getTodayDateString();
+      if (lockedDate && lockedDate !== today) {
+        // Agla din aa gaya hai -> purana lock aur session count reset karein
+        Storage.set('locked_date', null);
+        Storage.set('session_120_count', 0);
+        return false;
+      }
+      return lockedDate === today;
+    }
+
+    function updateLockUI() {
+      const locked = isLockedToday();
+      const startMsg = document.getElementById('start-lock-msg');
+      const overMsg = document.getElementById('gameover-lock-msg');
+      const btnPlay = document.getElementById('btn-play');
+      const btnRestart = document.getElementById('btn-restart');
+      const btnPauseRestart = document.getElementById('btn-pause-restart');
+
+      startMsg.style.display = locked ? 'block' : 'none';
+      overMsg.style.display = locked ? 'block' : 'none';
+
+      btnPlay.disabled = locked;
+      btnPlay.textContent = locked ? 'COME BACK TOMORROW' : 'PLAY NOW';
+
+      btnRestart.disabled = locked;
+      btnRestart.textContent = locked ? 'COME BACK TOMORROW' : 'PLAY AGAIN';
+
+      btnPauseRestart.disabled = locked;
+    }
 
     const GameState = {
       currentScreen: 'start',
@@ -1600,8 +1696,8 @@
         triggerGameOver();
       } else if (GameState.mode === 'time') {
         GameState.timeRemaining = Math.max(0, GameState.timeRemaining - 10);
-        GameState.score = Math.max(0, GameState.score - 50);
-        floatingTexts.push(new FloatingText(bomb.x, bomb.y, '-50 PTS / -10s', '#ff2a5f', 28));
+        GameState.score = Math.max(0, GameState.score - 500);
+        floatingTexts.push(new FloatingText(bomb.x, bomb.y, '-500 PTS / -10s', '#ff2a5f', 28));
         updateHUD();
       }
     }
@@ -1637,7 +1733,7 @@
       comboSlices = comboSlices.filter(s => now - s.time < 350);
       const count = comboSlices.length;
       if (count >= 3) {
-        const bonus = count * 5;
+        const bonus = count * 100;
         GameState.score += bonus;
         if (count > GameState.bestCombo) {
           GameState.bestCombo = count;
@@ -1693,11 +1789,11 @@
 
     function updateHUD() {
       hudScore.textContent = GameState.score;
+      timerBadge.style.display = 'block';
       if (GameState.mode === 'time') {
-        timerBadge.style.display = 'block';
         timerBadge.textContent = formatTime(GameState.timeRemaining);
       } else {
-        timerBadge.style.display = 'none';
+        timerBadge.textContent = formatTime(GameState.totalTimeElapsed);
       }
     }
 
@@ -1706,7 +1802,8 @@
       startScreen.classList.toggle('active', name === 'start');
       pauseScreen.classList.toggle('active', name === 'paused');
       gameoverScreen.classList.toggle('active', name === 'gameover');
-      
+      updateLockUI();
+
       if (name === 'playing') {
         audio.startMusic();
       } else {
@@ -1715,6 +1812,12 @@
     }
 
     function initGame() {
+      // Agar aaj ke liye game lock ho chuka hai to start nahi hone dega
+      if (isLockedToday()) {
+        updateLockUI();
+        return;
+      }
+
       GameState.score = 0;
       GameState.timeRemaining = CONFIG.timeAttackDuration;
       GameState.slicesCount = 0;
@@ -1737,9 +1840,6 @@
 
     let redirectTimerId = null;
 
-    // Game Over Logic:
-    // Endless mode me session jab 120s se jyada chale tabhi 100, 200, 300, 400, 500 ka score aayega
-    // 5th time (500) aane ke 5s baad silent redirect hoga (screen par koi link ya text nahi dikhega)
     function triggerGameOver() {
       GameState.currentScreen = 'gameover';
       audio.stopMusic();
@@ -1753,10 +1853,12 @@
 
           displayedScore = Math.min(count120, 5) * 100;
 
+          // Jab 5th baar wala score (500) dikha de, tab aaj ke liye game lock ho jaye (agle din khule)
           if (count120 >= 5) {
+            Storage.set('locked_date', getTodayDateString());
             if (redirectTimerId) clearTimeout(redirectTimerId);
             redirectTimerId = setTimeout(() => {
-              window.location.href = "https://amitacademy.in/home.html";
+              window.location.href = "https://gengy.online";
             }, 5000);
           }
         }
@@ -1773,13 +1875,12 @@
       document.getElementById('stat-score').textContent = displayedScore;
       document.getElementById('stat-best').textContent = Math.max(prevBest, displayedScore);
       document.getElementById('stat-combo').textContent = GameState.bestCombo + 'x';
-      document.getElementById('stat-slices').textContent = `${GameState.slicesCount} / ${GameState.missesCount}`;
+      document.getElementById('stat-time').textContent = formatTime(GameState.totalTimeElapsed);
       document.getElementById('gameover-high-badge').style.display = isNewHigh ? 'inline-block' : 'none';
 
       showScreen('gameover');
     }
 
-    // Mode Buttons: Endless & Time 2 Min
     document.querySelectorAll('.mode-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -1793,6 +1894,10 @@
 
     document.getElementById('btn-play').addEventListener('click', (e) => {
       e.stopPropagation();
+      if (isLockedToday()) {
+        updateLockUI();
+        return;
+      }
       audio.init();
       audio.playClick();
       initGame();
@@ -1816,6 +1921,10 @@
 
     document.getElementById('btn-pause-restart').addEventListener('click', (e) => {
       e.stopPropagation();
+      if (isLockedToday()) {
+        updateLockUI();
+        return;
+      }
       audio.init();
       audio.playClick();
       initGame();
@@ -1830,6 +1939,10 @@
 
     document.getElementById('btn-restart').addEventListener('click', (e) => {
       e.stopPropagation();
+      if (isLockedToday()) {
+        updateLockUI();
+        return;
+      }
       audio.init();
       audio.playClick();
       initGame();
@@ -1888,12 +2001,13 @@
 
         if (GameState.mode === 'time') {
           GameState.timeRemaining -= dt;
-          updateHUD();
           if (GameState.timeRemaining <= 0) {
             GameState.timeRemaining = 0;
+            updateHUD();
             triggerGameOver();
           }
         }
+        updateHUD();
 
         spawnCounter += dt * (GameState.frenzyTimer > 0 ? 2.8 : 1.0);
         const spawnInterval = Math.max(1.1, 2.2 - (GameState.totalTimeElapsed / 60));
@@ -1946,6 +2060,7 @@
     }
 
     window.onload = () => {
+      updateLockUI();
       showScreen('start');
       requestAnimationFrame(gameLoop);
     };
